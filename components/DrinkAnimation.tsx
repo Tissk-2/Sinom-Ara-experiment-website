@@ -18,7 +18,7 @@ export default function DrinkAnimation() {
     const preloadImages = async () => {
       for (let i = 0; i < FRAME_COUNT; i++) {
         const img = new Image();
-        const filename = String(i + 1).padStart(5, '0') + '.jpg';
+        const filename = String(i + 1).padStart(5, '0') + '.webp';
         img.src = `/sequence/${filename}`; 
         await new Promise((resolve) => {
           img.onload = () => {
