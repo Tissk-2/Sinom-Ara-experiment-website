@@ -8,7 +8,7 @@ export default function Home() {
       <DrinkAnimation />
 
       {/* Rest of the website */}
-      <div className="relative z-10 bg-[var(--bg)]">
+      <div className="relative z-10 bg-[#faf7f0]">
         <LandingContent />
       </div>
     </main>

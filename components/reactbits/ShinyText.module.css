@@ -1,0 +1,33 @@
+.shinyText {
+  color: var(--product-accent, #b86a04);
+  background: linear-gradient(
+    120deg,
+    var(--product-accent, #b86a04) 0%,
+    var(--product-accent, #b86a04) 35%,
+    #ffc83b 50%,
+    var(--product-accent, #b86a04) 65%,
+    var(--product-accent, #b86a04) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  display: inline-block;
+  animation: shine 5s linear infinite;
+}
+
+@keyframes shine {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shinyText {
+    animation: none;
+    background: none;
+    color: var(--product-accent, #b86a04);
+  }
+}
