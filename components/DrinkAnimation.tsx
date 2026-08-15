@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useTransform, useMotionValueEvent, useMotionValue } from "framer-motion";
+import { motion, useTransform, useMotionValueEvent, useMotionValue, useSpring } from "framer-motion";
 
 const FRAME_COUNT = 192;
 
@@ -64,6 +64,13 @@ function AnimationSequence({ images }: { images: HTMLImageElement[] }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rawProgress = useMotionValue(0);
 
+  // Smooth Spring physics: creates organic, buttery soft easing when scrolling or snapping
+  const smoothProgress = useSpring(rawProgress, {
+    stiffness: 80,
+    damping: 25,
+    mass: 0.5,
+  });
+
   useEffect(() => {
     const handleScroll = () => {
       const container = containerRef.current;
@@ -87,7 +94,7 @@ function AnimationSequence({ images }: { images: HTMLImageElement[] }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [rawProgress]);
 
-  const renderFrame = (progress: number) => {
+  const renderFrame = (progressValue: number) => {
     if (images.length === 0 || !canvasRef.current) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
@@ -99,7 +106,7 @@ function AnimationSequence({ images }: { images: HTMLImageElement[] }) {
     canvas.height = h;
 
     // The animation will keep going until progress = 1.15 (partially covered by next section)
-    const animationProgress = Math.min(1, progress / 1.15);
+    const animationProgress = Math.min(1, progressValue / 1.15);
     const frameIndex = Math.min(
       FRAME_COUNT - 1,
       Math.max(0, Math.round(animationProgress * (FRAME_COUNT - 1)))
@@ -120,42 +127,42 @@ function AnimationSequence({ images }: { images: HTMLImageElement[] }) {
   };
 
   useEffect(() => {
-    renderFrame(rawProgress.get());
-    const handleResize = () => renderFrame(rawProgress.get());
+    renderFrame(smoothProgress.get());
+    const handleResize = () => renderFrame(smoothProgress.get());
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [images, rawProgress]);
+  }, [images, smoothProgress]);
 
-  useMotionValueEvent(rawProgress, "change", (latest) => {
+  useMotionValueEvent(smoothProgress, "change", (latest) => {
     renderFrame(latest);
   });
 
-  // Beat A: Opening (Hold 0–20%, fade out 20–33%)
-  const opacityA = useTransform(rawProgress, [0, 0.20, 0.28, 0.33], [1, 1, 0.4, 0]);
-  const yA = useTransform(rawProgress, [0, 0.20, 0.28, 0.33], [0, 0, -10, -30]);
+  // Beat A: Opening (Hold 0–16%, completely fade out by 22%)
+  const opacityA = useTransform(smoothProgress, [0, 0.16, 0.22], [1, 1, 0]);
+  const yA = useTransform(smoothProgress, [0, 0.16, 0.22], [0, 0, -25]);
 
-  // Beat B: Ingredients (The Roots) (Fade in 20–27%, Hold 27–45%, Fade out 45–53%)
-  const opacityB = useTransform(rawProgress, [0.20, 0.27, 0.45, 0.53], [0, 1, 1, 0]);
-  const yB = useTransform(rawProgress, [0.20, 0.27, 0.45, 0.53], [30, 0, 0, -30]);
+  // Beat B: Ingredients (The Roots) (Fade in 25–30%, Hold 30–42%, completely fade out by 48%)
+  const opacityB = useTransform(smoothProgress, [0.25, 0.30, 0.42, 0.48], [0, 1, 1, 0]);
+  const yB = useTransform(smoothProgress, [0.25, 0.30, 0.42, 0.48], [25, 0, 0, -25]);
 
-  // Beat C: Character (The Balance) (Fade in 53–60%, Hold 60–78%, Fade out 78–86%)
-  const opacityC = useTransform(rawProgress, [0.53, 0.60, 0.78, 0.86], [0, 1, 1, 0]);
-  const yC = useTransform(rawProgress, [0.53, 0.60, 0.78, 0.86], [30, 0, 0, -30]);
+  // Beat C: Character (The Balance) (Fade in 55–60%, Hold 60–72%, completely fade out by 78%)
+  const opacityC = useTransform(smoothProgress, [0.55, 0.60, 0.72, 0.78], [0, 1, 1, 0]);
+  const yC = useTransform(smoothProgress, [0.55, 0.60, 0.72, 0.78], [25, 0, 0, -25]);
 
-  // Beat D: Closing & CTA (Fade in 86–94%, Hold through end)
-  const opacityD = useTransform(rawProgress, [0.86, 0.94, 1.1], [0, 1, 1]);
-  const yD = useTransform(rawProgress, [0.86, 0.94, 1.1], [30, 0, 0]);
+  // Beat D: Closing & CTA (Fade in 85–92%, Hold through end)
+  const opacityD = useTransform(smoothProgress, [0.85, 0.92, 1.05], [0, 1, 1]);
+  const yD = useTransform(smoothProgress, [0.85, 0.92, 1.05], [25, 0, 0]);
 
-  const indicatorOpacity = useTransform(rawProgress, [0, 0.06], [1, 0]);
+  const indicatorOpacity = useTransform(smoothProgress, [0, 0.05], [1, 0]);
 
   return (
-    <div ref={containerRef} className="relative w-full" style={{ height: "500vh" }}>
-      {/* Scroll-snap anchors — positioned in exact viewport heights (vh) with scroll-snap-stop: always */}
-      <div className="snap-point absolute top-0 h-screen w-full pointer-events-none" aria-hidden="true" />
-      <div className="snap-point absolute top-[133.33vh] h-screen w-full pointer-events-none" aria-hidden="true" />
-      <div className="snap-point absolute top-[266.66vh] h-screen w-full pointer-events-none" aria-hidden="true" />
-      <div className="snap-point absolute top-[400vh] h-screen w-full pointer-events-none" aria-hidden="true" />
+    <div ref={containerRef} className="relative w-full" style={{ height: "650vh" }}>
+      {/* Extra-wide continuous magnetic snap segments (183.33vh reach per beat) */}
+      <div className="snap-point absolute top-0 w-full pointer-events-none" style={{ height: "183.33vh" }} aria-hidden="true" />
+      <div className="snap-point absolute top-[183.33vh] w-full pointer-events-none" style={{ height: "183.33vh" }} aria-hidden="true" />
+      <div className="snap-point absolute top-[366.66vh] w-full pointer-events-none" style={{ height: "183.33vh" }} aria-hidden="true" />
+      <div className="snap-point absolute top-[550vh] w-full pointer-events-none" style={{ height: "100vh" }} aria-hidden="true" />
 
       <div className="fixed top-0 left-0 min-h-[100dvh] w-full overflow-hidden bg-[var(--bg)] z-0">
         <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
