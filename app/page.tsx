@@ -8,7 +8,7 @@ export default function Home() {
       <DrinkAnimation />
 
       {/* Rest of the website */}
-      <div className="snap-point relative z-10 bg-[#faf7f0]">
+      <div className="relative z-10 bg-[#faf7f0]">
         <LandingContent />
       </div>
     </main>

@@ -42,15 +42,18 @@ export default function DrinkAnimation() {
 
   if (!loaded) {
     return (
-      <div className="min-h-[100dvh] w-full flex flex-col items-center justify-center bg-[var(--bg)] text-white">
+      <div className="min-h-[100dvh] w-full flex flex-col items-center justify-center bg-[var(--bg)] text-white select-none">
         <div className="w-48 h-px bg-white/20 rounded-full overflow-hidden mb-6">
           <div 
             className="h-full bg-white transition-all duration-500 ease-out" 
             style={{ width: `${loadingProgress}%` }}
           />
         </div>
-        <p className="text-white/70 tracking-[0.25em] text-[11px] uppercase">
+        <p className="text-white/70 tracking-[0.25em] text-[11px] uppercase mb-2">
           Loading {loadingProgress}%
+        </p>
+        <p className="text-white/40 tracking-[0.18em] text-[10px] uppercase font-light">
+          Please wait for the loading to finish
         </p>
       </div>
     );
@@ -64,11 +67,11 @@ function AnimationSequence({ images }: { images: HTMLImageElement[] }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rawProgress = useMotionValue(0);
 
-  // Smooth Spring physics: creates organic, buttery soft easing when scrolling or snapping
+  // Responsive spring physics: swift, effortless feel with smooth deceleration
   const smoothProgress = useSpring(rawProgress, {
-    stiffness: 80,
-    damping: 25,
-    mass: 0.5,
+    stiffness: 110,
+    damping: 26,
+    mass: 0.35,
   });
 
   useEffect(() => {
@@ -105,8 +108,8 @@ function AnimationSequence({ images }: { images: HTMLImageElement[] }) {
     canvas.width = w;
     canvas.height = h;
 
-    // The animation will keep going until progress = 1.15 (partially covered by next section)
-    const animationProgress = Math.min(1, progressValue / 1.15);
+    // The animation reaches its full splash climax (frame 192) at progress = 1.25 (where only the top splash is visible)
+    const animationProgress = Math.min(1, progressValue / 1.25);
     const frameIndex = Math.min(
       FRAME_COUNT - 1,
       Math.max(0, Math.round(animationProgress * (FRAME_COUNT - 1)))
@@ -150,19 +153,19 @@ function AnimationSequence({ images }: { images: HTMLImageElement[] }) {
   const opacityC = useTransform(smoothProgress, [0.55, 0.60, 0.72, 0.78], [0, 1, 1, 0]);
   const yC = useTransform(smoothProgress, [0.55, 0.60, 0.72, 0.78], [25, 0, 0, -25]);
 
-  // Beat D: Closing & CTA (Fade in 85–92%, Hold through end)
-  const opacityD = useTransform(smoothProgress, [0.85, 0.92, 1.05], [0, 1, 1]);
-  const yD = useTransform(smoothProgress, [0.85, 0.92, 1.05], [25, 0, 0]);
+  // Beat D: Closing & CTA (Fade in 85–92%, Hold around 1.0, fade out as white page covers)
+  const opacityD = useTransform(smoothProgress, [0.85, 0.92, 1.0, 1.12], [0, 1, 1, 0]);
+  const yD = useTransform(smoothProgress, [0.85, 0.92, 1.0, 1.12], [25, 0, 0, -25]);
 
   const indicatorOpacity = useTransform(smoothProgress, [0, 0.05], [1, 0]);
 
   return (
-    <div ref={containerRef} className="relative w-full" style={{ height: "650vh" }}>
-      {/* Extra-wide continuous magnetic snap segments (183.33vh reach per beat) */}
-      <div className="snap-point absolute top-0 w-full pointer-events-none" style={{ height: "183.33vh" }} aria-hidden="true" />
-      <div className="snap-point absolute top-[183.33vh] w-full pointer-events-none" style={{ height: "183.33vh" }} aria-hidden="true" />
-      <div className="snap-point absolute top-[366.66vh] w-full pointer-events-none" style={{ height: "183.33vh" }} aria-hidden="true" />
-      <div className="snap-point absolute top-[550vh] w-full pointer-events-none" style={{ height: "100vh" }} aria-hidden="true" />
+    <div ref={containerRef} className="relative w-full" style={{ height: "400vh" }}>
+      {/* 100vh continuous snap segments for effortless, brisk scrolling */}
+      <div className="snap-point absolute top-0 w-full pointer-events-none" style={{ height: "100vh" }} aria-hidden="true" />
+      <div className="snap-point absolute top-[100vh] w-full pointer-events-none" style={{ height: "100vh" }} aria-hidden="true" />
+      <div className="snap-point absolute top-[200vh] w-full pointer-events-none" style={{ height: "100vh" }} aria-hidden="true" />
+      <div className="snap-point absolute top-[300vh] w-full pointer-events-none" style={{ height: "100vh" }} aria-hidden="true" />
 
       <div className="fixed top-0 left-0 min-h-[100dvh] w-full overflow-hidden bg-[var(--bg)] z-0">
         <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
