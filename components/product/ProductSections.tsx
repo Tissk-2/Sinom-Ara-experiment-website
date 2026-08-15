@@ -10,7 +10,6 @@ import {
 } from "./productContent";
 import SpotlightCard from "../reactbits/SpotlightCard";
 import ShinyText from "../reactbits/ShinyText";
-import Magnet from "../reactbits/Magnet";
 import styles from "./ProductSections.module.css";
 
 function SectionLabel({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -107,18 +106,14 @@ export default function ProductSections() {
                 <p className={styles.productCardDesc}>{product.description}</p>
                 <div className={styles.productCardFooter}>
                   <strong className={styles.productPrice}>{product.price}</strong>
-                  <Magnet padding={25} magnetStrength={0.2}>
-                    <motion-hover scale="1.03">
-                      <a
-                        href={PRODUCT_FACTS.instagramUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.cardOrderLink}
-                      >
-                        Pesan via Instagram →
-                      </a>
-                    </motion-hover>
-                  </Magnet>
+                  <a
+                    href={PRODUCT_FACTS.instagramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.cardOrderLink}
+                  >
+                    Pesan via Instagram →
+                  </a>
                 </div>
               </div>
             </SpotlightCard>
@@ -212,22 +207,14 @@ export default function ProductSections() {
           <SectionLabel>{PRODUCT_FACTS.orderEyebrow}</SectionLabel>
           <h2 id="order-heading">{PRODUCT_FACTS.orderHeading}</h2>
           <p>{PRODUCT_FACTS.orderBody}</p>
-          <Magnet padding={50} magnetStrength={0.25}>
-            <motion-magnetic>
-              <motion-hover y="-2" scale="1.01" bounce="0.12">
-                <motion-press scale="0.97" duration="0.15">
-                  <a
-                    href={PRODUCT_FACTS.instagramUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.primaryCta}
-                  >
-                    {PRODUCT_FACTS.orderLabel}
-                  </a>
-                </motion-press>
-              </motion-hover>
-            </motion-magnetic>
-          </Magnet>
+          <a
+            href={PRODUCT_FACTS.instagramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.primaryCta}
+          >
+            {PRODUCT_FACTS.orderLabel}
+          </a>
         </div>
         <div aria-hidden="true" className={styles.sun} />
       </section>

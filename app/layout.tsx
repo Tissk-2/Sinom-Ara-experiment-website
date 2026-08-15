@@ -16,8 +16,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${outfit.variable} antialiased bg-[#0a0a0a] overflow-visible`}>
-      <body className="overflow-visible font-[family-name:var(--font-outfit)]">{children}</body>
+    <html lang="en" className={`${outfit.variable} antialiased bg-[#0a0a0a]`}>
+      <body className="font-[family-name:var(--font-outfit)]">{children}</body>
     </html>
   );
 }

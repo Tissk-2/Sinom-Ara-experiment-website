@@ -37,13 +37,10 @@ describe("LandingContent", () => {
     expect(container.textContent).not.toMatch(/anti-inflammatory|digestive|glycemic/i);
   });
 
-  it("uses all approved Motion Components primitives without hiding the CTA", () => {
+  it("uses approved Motion Components primitives and renders the CTA", () => {
     const { container } = render(<LandingContent />);
     expect(container.querySelectorAll("motion-reveal").length).toBeGreaterThan(0);
     expect(container.querySelectorAll("motion-stagger").length).toBeGreaterThanOrEqual(2);
-    expect(container.querySelectorAll("motion-hover").length).toBeGreaterThan(0);
-    expect(container.querySelector("motion-press")).toBeInTheDocument();
-    expect(container.querySelector("motion-magnetic")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Order this week on Instagram" })).toBeVisible();
   });
 });

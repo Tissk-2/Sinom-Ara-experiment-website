@@ -39,3 +39,25 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# AI & Assistant Tools
+.gemini/
+.superpowers/
+.agents/
+.cursor/
+.aide/
+.cline/
+AGENTS.md
+GEMINI.md
+CLAUDE.md
+docs/superpowers/
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test Artifacts
+test-results/
+

@@ -3,18 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useTransform, useMotionValueEvent, useMotionValue } from "framer-motion";
 
-declare module "react" {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace JSX {
-    interface IntrinsicElements {
-      'motion-magnetic': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-      'motion-split': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & { animation?: string }, HTMLElement>;
-      'motion-reveal': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & { animation?: string; delay?: string }, HTMLElement>;
-      'motion-stagger': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & { interval?: string }, HTMLElement>;
-    }
-  }
-}
-
 const FRAME_COUNT = 192;
 
 export default function DrinkAnimation() {
@@ -110,8 +98,8 @@ function AnimationSequence({ images }: { images: HTMLImageElement[] }) {
     canvas.width = w;
     canvas.height = h;
 
-    // The animation will keep going until progress = 1.25 (partially covered by next section)
-    const animationProgress = Math.min(1, progress / 1.25);
+    // The animation will keep going until progress = 1.15 (partially covered by next section)
+    const animationProgress = Math.min(1, progress / 1.15);
     const frameIndex = Math.min(
       FRAME_COUNT - 1,
       Math.max(0, Math.round(animationProgress * (FRAME_COUNT - 1)))
@@ -143,26 +131,32 @@ function AnimationSequence({ images }: { images: HTMLImageElement[] }) {
     renderFrame(latest);
   });
 
-  // Beat A: Opening (0–25%)
-  const opacityA = useTransform(rawProgress, [0, 0.1, 0.15, 0.25], [1, 1, 1, 0]);
-  const yA = useTransform(rawProgress, [0, 0.1, 0.15, 0.25], [0, 0, 0, -30]);
+  // Beat A: Opening (Hold 0–20%, fade out 20–33%)
+  const opacityA = useTransform(rawProgress, [0, 0.20, 0.28, 0.33], [1, 1, 0.4, 0]);
+  const yA = useTransform(rawProgress, [0, 0.20, 0.28, 0.33], [0, 0, -10, -30]);
 
-  // Beat B: Ingredients (25–50%)
-  const opacityB = useTransform(rawProgress, [0.25, 0.35, 0.4, 0.5], [0, 1, 1, 0]);
-  const yB = useTransform(rawProgress, [0.25, 0.35, 0.4, 0.5], [30, 0, 0, -30]);
+  // Beat B: Ingredients (The Roots) (Fade in 20–27%, Hold 27–45%, Fade out 45–53%)
+  const opacityB = useTransform(rawProgress, [0.20, 0.27, 0.45, 0.53], [0, 1, 1, 0]);
+  const yB = useTransform(rawProgress, [0.20, 0.27, 0.45, 0.53], [30, 0, 0, -30]);
 
-  // Beat C: Character (50–75%)
-  const opacityC = useTransform(rawProgress, [0.5, 0.6, 0.65, 0.75], [0, 1, 1, 0]);
-  const yC = useTransform(rawProgress, [0.5, 0.6, 0.65, 0.75], [30, 0, 0, -30]);
+  // Beat C: Character (The Balance) (Fade in 53–60%, Hold 60–78%, Fade out 78–86%)
+  const opacityC = useTransform(rawProgress, [0.53, 0.60, 0.78, 0.86], [0, 1, 1, 0]);
+  const yC = useTransform(rawProgress, [0.53, 0.60, 0.78, 0.86], [30, 0, 0, -30]);
 
-  // Beat D: Closing (75–100%)
-  const opacityD = useTransform(rawProgress, [0.75, 0.85, 1], [0, 1, 1]);
-  const yD = useTransform(rawProgress, [0.75, 0.85, 1], [30, 0, 0]);
+  // Beat D: Closing & CTA (Fade in 86–94%, Hold through end)
+  const opacityD = useTransform(rawProgress, [0.86, 0.94, 1.1], [0, 1, 1]);
+  const yD = useTransform(rawProgress, [0.86, 0.94, 1.1], [30, 0, 0]);
 
-  const indicatorOpacity = useTransform(rawProgress, [0, 0.08], [1, 0]);
+  const indicatorOpacity = useTransform(rawProgress, [0, 0.06], [1, 0]);
 
   return (
-    <div ref={containerRef} className="relative w-full" style={{ height: "400vh" }}>
+    <div ref={containerRef} className="relative w-full" style={{ height: "500vh" }}>
+      {/* Scroll-snap anchors — positioned in exact viewport heights (vh) with scroll-snap-stop: always */}
+      <div className="snap-point absolute top-0 h-screen w-full pointer-events-none" aria-hidden="true" />
+      <div className="snap-point absolute top-[133.33vh] h-screen w-full pointer-events-none" aria-hidden="true" />
+      <div className="snap-point absolute top-[266.66vh] h-screen w-full pointer-events-none" aria-hidden="true" />
+      <div className="snap-point absolute top-[400vh] h-screen w-full pointer-events-none" aria-hidden="true" />
+
       <div className="fixed top-0 left-0 min-h-[100dvh] w-full overflow-hidden bg-[var(--bg)] z-0">
         <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
         
