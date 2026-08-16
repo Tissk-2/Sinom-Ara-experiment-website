@@ -1,7 +1,6 @@
 import Image from "next/image";
 import {
   FAQS,
-  INGREDIENTS,
   PROCESS_STEPS,
   PRODUCT_DETAILS,
   PRODUCT_FACTS,
@@ -46,26 +45,6 @@ export default function ProductSections() {
         </div>
       </section>
 
-      {/* ─── 2. Ingredients ─── */}
-      <section id="ingredients" aria-labelledby="ingredients-heading" className={styles.ingredients}>
-        <div>
-          <motion-reveal>
-            <SectionLabel>What goes in</SectionLabel>
-            <h2 id="ingredients-heading">{PRODUCT_FACTS.ingredientHeading}</h2>
-          </motion-reveal>
-        </div>
-        <motion-stagger interval="0.12" className={styles.numberedList}>
-          {INGREDIENTS.map((item) => (
-            <article key={item.number} role="listitem" className={styles.numberedItem}>
-              <span aria-hidden="true">{item.number}</span>
-              <div>
-                <h3>{item.name}</h3>
-                <p>{item.description}</p>
-              </div>
-            </article>
-          ))}
-        </motion-stagger>
-      </section>
 
       {/* ─── 3. Product Lineup / Pilihan Ukuran with React Bits SpotlightCards ─── */}
       <section id="produk" aria-labelledby="products-title" className={styles.productsSection}>

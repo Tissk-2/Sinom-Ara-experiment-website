@@ -5,20 +5,17 @@ import LandingContent from "@/components/LandingContent";
 vi.mock("motion-components", () => ({}));
 
 describe("LandingContent", () => {
-  it("renders the five-part editorial journey", () => {
+  it("renders the editorial journey", () => {
     render(<LandingContent />);
     expect(screen.getByRole("heading", { name: "A Javanese classic, brewed for right now." })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Three ingredients, held in balance." })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Sweet. Sour. Earthy." })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Freshly brewed. Ready when the batch is." })).toBeInTheDocument();
     expect(screen.getByRole("contentinfo")).toBeInTheDocument();
   });
 
-  it("shows the verified ingredients and preparation facts", () => {
+  it("shows the verified process and preparation facts", () => {
     render(<LandingContent />);
-    for (const name of ["Young tamarind leaves", "Fresh turmeric", "Palm sugar"]) {
-      expect(screen.getAllByText(name).length).toBeGreaterThanOrEqual(1);
-    }
+    expect(screen.getByText("Fresh ingredients")).toBeInTheDocument();
     expect(screen.getByText("Small batches")).toBeInTheDocument();
     expect(screen.getByText("Brewed weekly")).toBeInTheDocument();
   });

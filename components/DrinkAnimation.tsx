@@ -117,7 +117,11 @@ function AnimationSequence({ images }: { images: HTMLImageElement[] }) {
 
     const img = images[frameIndex];
     if (img && img.complete && img.naturalWidth > 0) {
-      const scale = Math.max(w / img.width, h / img.height);
+      // Responsive scale: on portrait / mobile screens, prevent extreme close-up over-zoom
+      const isPortrait = w < h;
+      const scale = isPortrait
+        ? Math.min((w / img.width) * 1.45, (h / img.height) * 0.85)
+        : Math.max(w / img.width, h / img.height);
       const drawW = img.width * scale;
       const drawH = img.height * scale;
       const offsetX = (w - drawW) / 2;

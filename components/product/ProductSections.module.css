@@ -33,7 +33,6 @@
 }
 
 .origin,
-.ingredients,
 .productsSection,
 .detailsSection,
 .craft,
@@ -45,7 +44,6 @@
 }
 
 .origin,
-.ingredients,
 .productsSection,
 .detailsSection,
 .craft,
@@ -111,45 +109,6 @@
   font-weight: 600;
 }
 
-/* ─── 2. Ingredients ─── */
-.ingredients {
-  position: relative;
-  isolation: isolate;
-  display: grid;
-  grid-template-columns: 5fr 6fr;
-  gap: 8%;
-  border-block: 1px solid var(--product-line);
-}
-
-.ingredients::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: 100vw;
-  height: 100%;
-  z-index: -1;
-  transform: translateX(-50%);
-  background: var(--product-surface-warm);
-}
-
-.ingredients > div:first-child::after {
-  content: "";
-  display: block;
-  width: min(16rem, 70%);
-  aspect-ratio: 1;
-  margin-top: 4rem;
-  border: 1px solid color-mix(in srgb, var(--product-accent) 35%, transparent);
-  border-radius: 70% 30% 65% 35%;
-  transform: rotate(-12deg);
-  transition: transform var(--dur-zoom) var(--ease-smooth),
-    border-color var(--dur-smooth) var(--ease-smooth);
-}
-
-.ingredients:hover > div:first-child::after {
-  transform: rotate(-6deg) scale(1.02);
-  border-color: color-mix(in srgb, var(--product-accent) 60%, transparent);
-}
 
 /* ─── Typography & Shared ─── */
 .label {
@@ -717,7 +676,6 @@
 
 @media (max-width: 767px) {
   .origin,
-  .ingredients,
   .craft {
     grid-template-columns: 1fr;
     gap: 4rem;
