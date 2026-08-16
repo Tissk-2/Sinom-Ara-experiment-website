@@ -7,6 +7,8 @@ export default defineConfig({
   resolve: { alias: { "@": path.resolve(__dirname, ".") } },
   test: {
     environment: "jsdom",
+    pool: "threads",
+    fileParallelism: false,
     setupFiles: ["./vitest.setup.ts"],
     include: ["tests/unit/**/*.test.ts", "tests/integration/**/*.test.tsx"],
     coverage: {
