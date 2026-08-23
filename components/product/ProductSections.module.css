@@ -581,7 +581,8 @@
 }
 
 .secondaryCta {
-  display: inline-flex;
+  display: flex;
+  width: fit-content;
   margin-top: 1.25rem;
   align-items: center;
   gap: 0.5rem;
