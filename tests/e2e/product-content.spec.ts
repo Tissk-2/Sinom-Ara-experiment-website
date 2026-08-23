@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+const WA_ORDER_LINK = /^https:\/\/wa\.me\/62\d+\?text=/;
+
 test.beforeEach(async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.evaluate(() => window.scrollTo(0, 600));
@@ -8,16 +10,26 @@ test.beforeEach(async ({ page }) => {
 
 test("shows the product story and verified order action", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "A Javanese classic, brewed for right now." })).toBeVisible();
-  for (const name of ["Young tamarind leaves", "Fresh turmeric", "Palm sugar"]) {
-    await expect(page.getByRole("heading", { name })).toBeVisible();
+  for (const name of ["275 ml", "180 ml", "120 ml"]) {
+    await expect(
+      page.getByRole("img", { name: `Kemasan Sinom ARA ${name}` }),
+    ).toBeVisible();
   }
-  const link = page.getByRole("link", { name: "Order this week on Instagram" });
+  const link = page.getByRole("link", { name: "Order this week on WhatsApp" }).first();
   await link.scrollIntoViewIfNeeded();
-  await expect(link).toHaveAttribute("href", "https://www.instagram.com/sinomaramalang/");
+  await expect(link).toHaveAttribute("href", WA_ORDER_LINK);
+});
+
+test("product cards carry prefilled WhatsApp order messages", async ({ page }) => {
+  const card = page.getByRole("link", { name: "Pesan via WhatsApp →" }).first();
+  await card.scrollIntoViewIfNeeded();
+  const href = await card.getAttribute("href");
+  expect(href).toMatch(WA_ORDER_LINK);
+  expect(decodeURIComponent(href ?? "")).toContain("275 ml");
 });
 
 test("has no horizontal overflow and exposes keyboard focus", async ({ page }) => {
-  const link = page.getByRole("link", { name: "Order this week on Instagram" });
+  const link = page.getByRole("link", { name: "Order this week on WhatsApp" }).first();
   await link.scrollIntoViewIfNeeded();
   await link.focus();
   await expect(link).toBeFocused();
@@ -40,7 +52,8 @@ test("keeps content and ordering usable without JavaScript", async ({ browser })
   const page = await context.newPage();
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.locator("#order").scrollIntoViewIfNeeded();
-  await expect(page.getByRole("link", { name: "Order this week on Instagram" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Order this week on Instagram" })).toBeHidden();
+  await expect(page.getByRole("link", { name: "Order this week on WhatsApp" }).first()).toBeVisible();
   await context.close();
 });
 

@@ -20,24 +20,29 @@ describe("LandingContent", () => {
     expect(screen.getByText("Brewed weekly")).toBeInTheDocument();
   });
 
-  it("uses one primary verified order action", () => {
+  it("uses one primary verified order action via WhatsApp", () => {
     render(<LandingContent />);
-    const link = screen.getByRole("link", { name: "Order this week on Instagram" });
-    expect(link).toHaveAttribute("href", "https://www.instagram.com/sinomaramalang/");
+    const link = screen.getByRole("link", { name: "Order this week on WhatsApp" });
+    expect(link).toHaveAttribute("href", expect.stringMatching(/^https:\/\/wa\.me\/62\d+\?text=/));
     expect(link).toHaveAttribute("target", "_blank");
     expect(link).toHaveAttribute("rel", "noopener noreferrer");
   });
 
-  it("removes unverified contact and health copy", () => {
+  it("keeps Instagram as a secondary verified destination", () => {
+    render(<LandingContent />);
+    const link = screen.getByRole("link", { name: "Visit Sinom ARA on Instagram" });
+    expect(link).toHaveAttribute("href", "https://www.instagram.com/sinomaramalang/");
+  });
+
+  it("removes unsupported health copy", () => {
     const { container } = render(<LandingContent />);
-    expect(container.textContent).not.toMatch(/WhatsApp|wa\.me|antioxid|vitamin/i);
-    expect(container.textContent).not.toMatch(/anti-inflammatory|digestive|glycemic/i);
+    expect(container.textContent).not.toMatch(/antioxid|vitamin|anti-inflammatory|digestive|glycemic/i);
   });
 
   it("uses approved Motion Components primitives and renders the CTA", () => {
     const { container } = render(<LandingContent />);
     expect(container.querySelectorAll("motion-reveal").length).toBeGreaterThan(0);
     expect(container.querySelectorAll("motion-stagger").length).toBeGreaterThanOrEqual(2);
-    expect(screen.getByRole("link", { name: "Order this week on Instagram" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Order this week on WhatsApp" })).toBeVisible();
   });
 });

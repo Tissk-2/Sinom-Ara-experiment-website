@@ -60,4 +60,6 @@ docs/superpowers/
 
 # Test Artifacts
 test-results/
+review-shots/
+review-shots.mjs
 

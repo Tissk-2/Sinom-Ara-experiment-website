@@ -4,40 +4,57 @@ export type NumberedItem = Readonly<{
   description: string;
 }>;
 
+export const SITE_URL = "https://sinom-ara-experiment-website.vercel.app";
+
+export const WHATSAPP_NUMBER = "6281617063757";
+
+export function buildWhatsappLink(message: string): string {
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+}
+
+export function whatsappOrderMessage(product: Readonly<{
+  size: string;
+  box: string;
+  price: string;
+}>): string {
+  return `Halo Sinom ARA! Saya mau pesan kemasan ${product.size} (${product.box}, ${product.price}). Masih tersedia untuk batch minggu ini?`;
+}
+
 export const PRODUCT_FACTS = Object.freeze({
   brand: "Sinom ARA",
   location: "Malang, East Java",
   originEyebrow: "Brewed in Malang",
   originHeading: "A Javanese classic, brewed for right now.",
   originBody:
-    "Sinom ARA brings a familiar Javanese refreshment into a careful small-batch ritual. Three natural ingredients, no artificial preservatives, and no shortcuts.",
+    "Sinom ARA menghadirkan kesegaran khas Jawa lewat ritual seduh small-batch yang telaten. Tiga bahan alami, tanpa pengawet buatan, tanpa jalan pintas.",
   ingredientHeading: "Three ingredients, held in balance.",
   tasteHeading: "Sweet. Sour. Earthy.",
   tasteBody:
-    "Bright tamarind leaf meets turmeric warmth and the rounded sweetness of palm sugar. Refreshing, grounded, and unmistakably sinom.",
+    "Daun asam muda bertemu kehangatan kunyit dan manisnya gula aren. Menyegarkan, membumi, dan tetap khas sinom.",
   orderEyebrow: "This week's batch",
   orderHeading: "Freshly brewed. Ready when the batch is.",
   orderBody:
-    "Sinom ARA is brewed weekly in Malang. Ask about the current batch and order directly through Instagram.",
-  orderLabel: "Order this week on Instagram",
+    "Sinom ARA diseduh setiap minggu di Malang. Tanyakan batch terbaru dan pesan langsung melalui WhatsApp kami.",
+  orderLabel: "Order this week on WhatsApp",
   instagramUrl: "https://www.instagram.com/sinomaramalang/",
+  instagramLabel: "Lihat aktivitas kami di Instagram",
 } as const);
 
 export const INGREDIENTS = Object.freeze([
   Object.freeze({
     number: "01",
     name: "Young tamarind leaves",
-    description: "A bright, clean sourness that gives sinom its unmistakable lift.",
+    description: "Asam segar yang memberi karakter khas pada sinom.",
   }),
   Object.freeze({
     number: "02",
     name: "Fresh turmeric",
-    description: "Earthy warmth and a deep golden tone.",
+    description: "Kehangatan rempah dengan warna emas yang pekat.",
   }),
   Object.freeze({
     number: "03",
     name: "Palm sugar",
-    description: "A rounded caramel sweetness that brings the blend into balance.",
+    description: "Manis karamel yang menyatukan seluruh rasa.",
   }),
 ] as const);
 
@@ -47,17 +64,17 @@ export const PROCESS_STEPS = Object.freeze<readonly NumberedItem[]>([
   Object.freeze({
     number: "01",
     title: "Fresh ingredients",
-    description: "Young tamarind leaves, fresh turmeric, and palm sugar.",
+    description: "Daun asam muda, kunyit segar, dan gula aren pilihan.",
   }),
   Object.freeze({
     number: "02",
     title: "Small batches",
-    description: "Prepared with the attention a short ingredient list deserves.",
+    description: "Diseduh dalam jumlah kecil agar kualitas setiap botol tetap terjaga.",
   }),
   Object.freeze({
     number: "03",
     title: "Brewed weekly",
-    description: "Fresh batches made in Malang and announced on Instagram.",
+    description: "Batch baru dibuat setiap minggu di Malang dan diumumkan lewat Instagram.",
   }),
 ]);
 
@@ -67,21 +84,21 @@ export const PRODUCT_SIZES = Object.freeze([
     box: "10 pcs / box",
     price: "Rp48.000",
     image: "/images/ara-sinom-bottle.jpg",
-    description: "Signature glass bottle size, ideal for sharing or stocking up.",
+    description: "Botol kaca signature, cocok untuk berbagi atau stok mingguan.",
   }),
   Object.freeze({
     size: "180 ml",
     box: "24 pcs / box",
     price: "Rp39.000",
     image: "/images/ara-sinom-options.jpg",
-    description: "Compact bottle packaging, great for daily personal refreshment.",
+    description: "Kemasan botol ringkas, pas untuk teman minum sehari-hari.",
   }),
   Object.freeze({
     size: "120 ml",
     box: "24 pcs / box",
     price: "Rp35.000",
-    image: "/images/ara-sinom-options.jpg",
-    description: "Convenient cup format, ideal for gatherings, events, and dining.",
+    image: "/images/ara-sinom-lineup.jpg",
+    description: "Format cup praktis, ideal untuk acara, rapat, dan santap bareng.",
   }),
 ] as const);
 
@@ -108,15 +125,15 @@ export const RESELLER_INFO = Object.freeze({
 export const FAQS = Object.freeze([
   Object.freeze({
     question: "Bagaimana cara memesan?",
-    answer: "Pilih ukuran yang diinginkan dan hubungi kami melalui Instagram @sinomaramalang untuk konfirmasi ketersediaan batch minggu ini.",
+    answer: "Pilih ukuran yang diinginkan, lalu klik tombol Pesan via WhatsApp. Pesanmu sudah berisi detail kemasan, tinggal kirim untuk konfirmasi ketersediaan batch minggu ini.",
   }),
   Object.freeze({
     question: "Apakah bisa dikirim ke luar Malang?",
-    answer: "Bisa dikirim ke berbagai kota di Indonesia. Hubungi kami untuk rincian ongkos kirim dan jadwal pengiriman batch.",
+    answer: "Bisa dikirim ke berbagai kota di Indonesia. Tanyakan rincian ongkos kirim dan jadwal pengiriman batch melalui WhatsApp kami.",
   }),
   Object.freeze({
     question: "Apakah menerima reseller dan dropship?",
-    answer: "Ya, kami membuka kesempatan kemitraan reseller dan dropship dengan penawaran harga khusus.",
+    answer: "Ya, kami membuka kesempatan kemitraan reseller dan dropship dengan penawaran harga khusus. Hubungi kami melalui WhatsApp untuk penawarannya.",
   }),
 ] as const);
 

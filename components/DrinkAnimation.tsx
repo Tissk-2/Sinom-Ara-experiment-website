@@ -1,68 +1,123 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { motion, useTransform, useMotionValueEvent, useMotionValue, useSpring } from "framer-motion";
 
 const FRAME_COUNT = 192;
+const CONCURRENCY = 16;
+
+function subscribePrefersReducedMotion(callback: () => void) {
+  const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+  mediaQuery.addEventListener("change", callback);
+  return () => mediaQuery.removeEventListener("change", callback);
+}
 
 export default function DrinkAnimation() {
   const [images, setImages] = useState<HTMLImageElement[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
 
+  const staticMode = useSyncExternalStore(
+    subscribePrefersReducedMotion,
+    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    () => false,
+  );
+
   useEffect(() => {
-    import("motion-components");
+    void import("motion-components");
   }, []);
 
   useEffect(() => {
-    let loadedCount = 0;
-    const imgArray: HTMLImageElement[] = [];
+    let cancelled = false;
 
-    const preloadImages = async () => {
-      for (let i = 0; i < FRAME_COUNT; i++) {
+    const total = staticMode ? 1 : FRAME_COUNT;
+    const urls = Array.from(
+      { length: total },
+      (_, i) => `/sequence/${String(i + 1).padStart(5, "0")}.webp`,
+    );
+    const imgArray: HTMLImageElement[] = new Array(total);
+    let settledCount = 0;
+    let nextIndex = 0;
+
+    const loadOne = (url: string, index: number) =>
+      new Promise<void>((resolve) => {
         const img = new Image();
-        const filename = String(i + 1).padStart(5, '0') + '.webp';
-        img.src = `/sequence/${filename}`; 
-        await new Promise((resolve) => {
-          img.onload = () => {
-            loadedCount++;
-            setLoadingProgress(Math.floor((loadedCount / FRAME_COUNT) * 100));
-            resolve(null);
-          };
-          img.onerror = () => resolve(null);
-        });
-        imgArray.push(img);
+        const settle = (succeeded: boolean) => {
+          if (succeeded) imgArray[index] = img;
+          settledCount += 1;
+          setLoadingProgress(Math.round((settledCount / total) * 100));
+          resolve();
+        };
+        img.onload = () => settle(true);
+        img.onerror = () => settle(false);
+        img.src = url;
+      });
+
+    const worker = async () => {
+      while (nextIndex < urls.length && !cancelled) {
+        const index = nextIndex;
+        nextIndex += 1;
+        await loadOne(urls[index], index);
       }
-      setImages(imgArray);
-      setLoaded(true);
     };
 
-    preloadImages();
-  }, []);
+    void Promise.all(
+      Array.from({ length: Math.min(CONCURRENCY, urls.length) }, () => worker()),
+    ).then(() => {
+      if (cancelled) return;
+      setImages(imgArray.filter(Boolean));
+      setLoaded(true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [staticMode]);
+
+  const skipToIntro = () => {
+    document.getElementById("heritage")?.scrollIntoView({ behavior: "auto" });
+  };
 
   if (!loaded) {
     return (
-      <div className="min-h-[100dvh] w-full flex flex-col items-center justify-center bg-[var(--bg)] text-white select-none">
+      <div className="min-h-[100dvh] w-full flex flex-col items-center justify-center bg-[var(--bg)] text-white select-none px-6">
         <div className="w-48 h-px bg-white/20 rounded-full overflow-hidden mb-6">
-          <div 
-            className="h-full bg-white transition-all duration-500 ease-out" 
+          <div
+            className="h-full bg-white transition-all duration-500 ease-out"
             style={{ width: `${loadingProgress}%` }}
           />
         </div>
-        <p className="text-white/70 tracking-[0.25em] text-[11px] uppercase mb-2">
+        <p
+          role="status"
+          aria-live="polite"
+          className="text-white/70 tracking-[0.25em] text-[11px] uppercase mb-2"
+        >
           Loading {loadingProgress}%
         </p>
         <p className="text-white/40 tracking-[0.18em] text-[10px] uppercase font-light">
           Please wait for the loading to finish
         </p>
+        <button
+          type="button"
+          onClick={skipToIntro}
+          className="mt-8 px-5 py-2 border border-white/30 text-white/80 hover:bg-white hover:text-black transition-colors duration-300 tracking-[0.2em] text-[11px] uppercase"
+        >
+          Lewati Intro
+        </button>
       </div>
     );
   }
 
-  return <AnimationSequence images={images} />;
+  return <AnimationSequence images={images} staticMode={staticMode} />;
 }
 
-function AnimationSequence({ images }: { images: HTMLImageElement[] }) {
+function AnimationSequence({
+  images,
+  staticMode = false,
+}: {
+  images: HTMLImageElement[];
+  staticMode?: boolean;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rawProgress = useMotionValue(0);
@@ -75,6 +130,8 @@ function AnimationSequence({ images }: { images: HTMLImageElement[] }) {
   });
 
   useEffect(() => {
+    if (staticMode) return;
+
     const handleScroll = () => {
       const container = containerRef.current;
       if (!container) return;
@@ -95,7 +152,7 @@ function AnimationSequence({ images }: { images: HTMLImageElement[] }) {
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [rawProgress]);
+  }, [rawProgress, staticMode]);
 
   const renderFrame = (progressValue: number) => {
     if (images.length === 0 || !canvasRef.current) return;
@@ -116,21 +173,22 @@ function AnimationSequence({ images }: { images: HTMLImageElement[] }) {
     );
 
     const img = images[frameIndex];
-    if (img && img.complete && img.naturalWidth > 0) {
-      // Responsive scale: on portrait / mobile screens, prevent extreme close-up over-zoom
-      const isPortrait = w < h;
-      const scale = isPortrait
-        ? Math.min((w / img.width) * 1.45, (h / img.height) * 0.85)
-        : Math.max(w / img.width, h / img.height);
-      const drawW = img.width * scale;
-      const drawH = img.height * scale;
-      const offsetX = (w - drawW) / 2;
-      const offsetY = (h - drawH) / 2;
-      
-      ctx.fillStyle = "#0a0a0a";
-      ctx.fillRect(0, 0, w, h);
-      ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
-    }
+    if (!img) return;
+    if (!(img.complete && img.naturalWidth > 0)) return;
+
+    // Responsive scale: on portrait / mobile screens, prevent extreme close-up over-zoom
+    const isPortrait = w < h;
+    const scale = isPortrait
+      ? Math.min((w / img.width) * 1.45, (h / img.height) * 0.85)
+      : Math.max(w / img.width, h / img.height);
+    const drawW = img.width * scale;
+    const drawH = img.height * scale;
+    const offsetX = (w - drawW) / 2;
+    const offsetY = (h - drawH) / 2;
+
+    ctx.fillStyle = "#0a0a0a";
+    ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
   };
 
   useEffect(() => {
@@ -164,18 +222,26 @@ function AnimationSequence({ images }: { images: HTMLImageElement[] }) {
   const indicatorOpacity = useTransform(smoothProgress, [0, 0.05], [1, 0]);
 
   return (
-    <div ref={containerRef} className="relative w-full" style={{ height: "400vh" }}>
+    <div
+      ref={containerRef}
+      className="relative w-full"
+      style={{ height: staticMode ? "100vh" : "400vh" }}
+    >
       {/* 100vh continuous snap segments for effortless, brisk scrolling */}
-      <div className="snap-point absolute top-0 w-full pointer-events-none" style={{ height: "100vh" }} aria-hidden="true" />
-      <div className="snap-point absolute top-[100vh] w-full pointer-events-none" style={{ height: "100vh" }} aria-hidden="true" />
-      <div className="snap-point absolute top-[200vh] w-full pointer-events-none" style={{ height: "100vh" }} aria-hidden="true" />
-      <div className="snap-point absolute top-[300vh] w-full pointer-events-none" style={{ height: "100vh" }} aria-hidden="true" />
+      {!staticMode && (
+        <>
+          <div className="snap-point absolute top-0 w-full pointer-events-none" style={{ height: "100vh" }} aria-hidden="true" />
+          <div className="snap-point absolute top-[100vh] w-full pointer-events-none" style={{ height: "100vh" }} aria-hidden="true" />
+          <div className="snap-point absolute top-[200vh] w-full pointer-events-none" style={{ height: "100vh" }} aria-hidden="true" />
+          <div className="snap-point absolute top-[300vh] w-full pointer-events-none" style={{ height: "100vh" }} aria-hidden="true" />
+        </>
+      )}
 
       <div className="fixed top-0 left-0 min-h-[100dvh] w-full overflow-hidden bg-[var(--bg)] z-0">
         <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
-        
+
         {/* Scroll Indicator */}
-        <motion.div 
+        <motion.div
           style={{ opacity: indicatorOpacity }}
           className="absolute bottom-8 md:bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 text-white/70"
         >
@@ -184,7 +250,7 @@ function AnimationSequence({ images }: { images: HTMLImageElement[] }) {
         </motion.div>
 
         {/* Beat A — Title */}
-        <motion.div 
+        <motion.div
           style={{ opacity: opacityA, y: yA }}
           className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-6"
         >
@@ -197,7 +263,7 @@ function AnimationSequence({ images }: { images: HTMLImageElement[] }) {
         </motion.div>
 
         {/* Beat B — Ingredients, left-aligned */}
-        <motion.div 
+        <motion.div
           style={{ opacity: opacityB, y: yB }}
           className="absolute inset-0 flex flex-col justify-center pointer-events-none px-6 md:px-16 lg:px-32"
         >
@@ -206,13 +272,13 @@ function AnimationSequence({ images }: { images: HTMLImageElement[] }) {
               THE ROOTS
             </h2>
             <p className="text-sm md:text-base text-white/70 font-light leading-relaxed max-w-[50ch]">
-              Young tamarind leaves, turmeric, and palm sugar — slow-brewed using a recipe passed down through generations in Malang.
+              Daun asam muda, kunyit, dan gula aren — diseduh perlahan dari resep warisan generasi Malang.
             </p>
           </div>
         </motion.div>
 
         {/* Beat C — Character, right-aligned */}
-        <motion.div 
+        <motion.div
           style={{ opacity: opacityC, y: yC }}
           className="absolute inset-0 flex flex-col justify-center items-end pointer-events-none px-6 md:px-16 lg:px-32"
         >
@@ -221,13 +287,13 @@ function AnimationSequence({ images }: { images: HTMLImageElement[] }) {
               THE BALANCE
             </h2>
             <p className="text-sm md:text-base text-white/70 font-light leading-relaxed max-w-[50ch] ml-auto">
-              Sweet, sour, and earthy. Refreshing on a hot day, grounding enough to stay with you.
+              Manis, asam, dan hangat. Menyegarkan di hari yang panas, dan cukup menenangkan untuk menemanimu.
             </p>
           </div>
         </motion.div>
 
         {/* Beat D — CTA */}
-        <motion.div 
+        <motion.div
           style={{ opacity: opacityD, y: yD }}
           className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-6"
         >
@@ -235,11 +301,11 @@ function AnimationSequence({ images }: { images: HTMLImageElement[] }) {
             GET YOURS
           </h2>
           <motion-magnetic>
-            <a 
-              href="#order" 
+            <a
+              href="#order"
               className="px-8 py-4 border border-white/40 text-white hover:bg-white hover:text-black transition-all duration-300 tracking-[0.2em] text-xs uppercase pointer-events-auto"
             >
-              Order Now
+              Pesan Sekarang
             </a>
           </motion-magnetic>
         </motion.div>

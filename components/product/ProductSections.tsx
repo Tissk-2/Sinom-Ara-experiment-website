@@ -1,11 +1,14 @@
 import Image from "next/image";
 import {
+  buildWhatsappLink,
   FAQS,
   PROCESS_STEPS,
   PRODUCT_DETAILS,
   PRODUCT_FACTS,
   PRODUCT_SIZES,
+  SITE_URL,
   TASTE_NOTES,
+  whatsappOrderMessage,
 } from "./productContent";
 import SpotlightCard from "../reactbits/SpotlightCard";
 import ShinyText from "../reactbits/ShinyText";
@@ -19,9 +22,42 @@ function SectionLabel({ children }: Readonly<{ children: React.ReactNode }>) {
   );
 }
 
+function buildProductJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Kemasan Sinom ARA",
+    itemListElement: PRODUCT_SIZES.map((product, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "Product",
+        name: `Sinom ARA ${product.size}`,
+        image: `${SITE_URL}${product.image}`,
+        description: product.description,
+        brand: { "@type": "Brand", name: PRODUCT_FACTS.brand },
+        offers: {
+          "@type": "Offer",
+          price: product.price.replace(/\D/g, ""),
+          priceCurrency: "IDR",
+          availability: "https://schema.org/InStock",
+          url: `${SITE_URL}#produk`,
+        },
+      },
+    })),
+  };
+}
+
 export default function ProductSections() {
+  const productJsonLd = buildProductJsonLd();
+
   return (
     <div data-product-content className={styles.surface}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
+
       {/* ─── 1. Origin / Heritage with Hero Image ─── */}
       <section id="heritage" aria-labelledby="origin-heading" className={styles.origin}>
         <div className={styles.originText}>
@@ -39,7 +75,6 @@ export default function ProductSections() {
             width={512}
             height={640}
             loading="eager"
-            unoptimized
             className={styles.originImage}
           />
         </div>
@@ -71,8 +106,7 @@ export default function ProductSections() {
                   alt={`Kemasan Sinom ARA ${product.size}`}
                   width={640}
                   height={800}
-                  loading="eager"
-                  unoptimized
+                  loading="lazy"
                   className={styles.productImage}
                 />
                 <span className={styles.productSizeBadge}>{product.size}</span>
@@ -86,12 +120,12 @@ export default function ProductSections() {
                 <div className={styles.productCardFooter}>
                   <strong className={styles.productPrice}>{product.price}</strong>
                   <a
-                    href={PRODUCT_FACTS.instagramUrl}
+                    href={buildWhatsappLink(whatsappOrderMessage(product))}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={styles.cardOrderLink}
                   >
-                    Pesan via Instagram →
+                    Pesan via WhatsApp →
                   </a>
                 </div>
               </div>
@@ -108,8 +142,7 @@ export default function ProductSections() {
             alt="Pilihan kemasan botol dan cup Sinom ARA"
             width={640}
             height={800}
-            loading="eager"
-            unoptimized
+            loading="lazy"
             className={styles.detailsImage}
           />
         </div>
@@ -180,19 +213,29 @@ export default function ProductSections() {
         </div>
       </section>
 
-      {/* ─── 7. Final Conversion / Order Section with React Bits Magnet ─── */}
+      {/* ─── 7. Final Conversion / Order Section ─── */}
       <section id="order" aria-labelledby="order-heading" className={styles.order}>
         <div className={styles.orderCopy}>
           <SectionLabel>{PRODUCT_FACTS.orderEyebrow}</SectionLabel>
           <h2 id="order-heading">{PRODUCT_FACTS.orderHeading}</h2>
           <p>{PRODUCT_FACTS.orderBody}</p>
           <a
-            href={PRODUCT_FACTS.instagramUrl}
+            href={buildWhatsappLink(
+              "Halo Sinom ARA! Saya ingin tanya ketersediaan batch minggu ini.",
+            )}
             target="_blank"
             rel="noopener noreferrer"
             className={styles.primaryCta}
           >
             {PRODUCT_FACTS.orderLabel}
+          </a>
+          <a
+            href={PRODUCT_FACTS.instagramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.secondaryCta}
+          >
+            {PRODUCT_FACTS.instagramLabel}
           </a>
         </div>
         <div aria-hidden="true" className={styles.sun} />

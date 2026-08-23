@@ -16,15 +16,17 @@ To offer a high-quality, authentic version of the traditional Javanese Sinom dri
 Authentic, small-batch traditional Sinom brewed with just three natural ingredients (tamarind leaves, turmeric, palm sugar) without artificial preservatives. It is positioned as a premium, heritage-rich product rather than a cheap street-side commodity.
 
 ## Operating Context
-Consumers ordering via Instagram (`@sinomaramalang`), receiving fresh batches brewed weekly in Malang.
+Consumers ordering via WhatsApp (`+62 816-1706-3757`, official & actively managed) or Instagram (`@sinomaramalang`), receiving fresh batches brewed weekly in Malang.
 
 ## Capabilities and Constraints
-- Must link to the real Instagram (`@sinomaramalang`) for orders.
+- Must link to the official WhatsApp number (`wa.me/6281617063757`) as the primary order channel, with prefilled per-product messages.
+- Must keep the real Instagram (`@sinomaramalang`) as a visible secondary destination.
 - Must accurately represent the three ingredients (tamarind leaves, turmeric, palm sugar).
 
 ## Brand Commitments
 - Tone is premium and heritage-focused.
 - Visual language established (dark mode, amber `#c9a96e` accent, Outfit font) is a confirmed brand commitment.
+- Bilingual rule: display headlines and eyebrow labels may stay in English; all functional copy (product descriptions, how-to-order, FAQ, CTA labels) must be Bahasa Indonesia.
 
 ## Evidence on Hand
 - Instagram profile link (`https://www.instagram.com/sinomaramalang/`).

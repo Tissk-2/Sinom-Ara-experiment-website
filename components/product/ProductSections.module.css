@@ -580,6 +580,33 @@
   outline-offset: 5px;
 }
 
+.secondaryCta {
+  display: inline-flex;
+  margin-top: 1.25rem;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--product-text);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: rgba(184, 106, 4, 0.4);
+  transition: text-decoration-color var(--dur-base) var(--ease-smooth),
+    color var(--dur-base) var(--ease-smooth);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.secondaryCta:hover {
+  color: var(--product-accent-bright);
+  text-decoration-color: currentColor;
+}
+
+.secondaryCta:focus-visible {
+  outline: 2px solid var(--product-text);
+  outline-offset: 5px;
+}
+
 .sun {
   min-height: 18rem;
   border-left: 1px solid rgba(184, 106, 4, 0.25);
