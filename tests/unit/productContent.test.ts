@@ -63,8 +63,7 @@ describe("verified Sinom ARA content", () => {
     expect(RESELLER_INFO.ctaLabel).toBe("Tanya Program Reseller");
   });
 
-  it("keeps the restored ingredient section copy intact", () => {
-    expect(PRODUCT_FACTS.ingredientEyebrow).toBe("What goes in");
+  it("keeps the ingredient section copy intact", () => {
     expect(PRODUCT_FACTS.ingredientHeading).toBe("Three ingredients, held in balance.");
     expect(PRODUCT_FACTS.ingredientBody).not.toMatch(HEALTH_CLAIM_PATTERN);
   });

@@ -4,13 +4,30 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { motion, useTransform, useMotionValueEvent, useMotionValue, useSpring } from "framer-motion";
 
 const FRAME_COUNT = 192;
-const CONCURRENCY = 16;
+// Every other frame: halves the payload with no visible loss once the spring
+// smooths progress. The last frame is loaded separately so the splash climax
+// stays intact.
+const FRAME_STEP = 2;
+const CONCURRENCY = 8;
 
 /**
  * Progress at which Beat D (the closing CTA) begins to fade in. Kept in sync
  * with the opacityD transform range below.
  */
 const CTA_REVEAL_PROGRESS = 0.85;
+
+function frameUrl(index: number) {
+  return `/sequence/${String(index + 1).padStart(5, "0")}.webp`;
+}
+
+function loadImage(url: string): Promise<HTMLImageElement | null> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+}
 
 function subscribePrefersReducedMotion(callback: () => void) {
   const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -46,7 +63,6 @@ function fillFrameGaps(
 export default function DrinkAnimation() {
   const [images, setImages] = useState<HTMLImageElement[]>([]);
   const [loaded, setLoaded] = useState(false);
-  const [loadingProgress, setLoadingProgress] = useState(0);
 
   const staticMode = useSyncExternalStore(
     subscribePrefersReducedMotion,
@@ -61,44 +77,55 @@ export default function DrinkAnimation() {
   useEffect(() => {
     let cancelled = false;
 
-    const total = staticMode ? 1 : FRAME_COUNT;
-    const urls = Array.from(
-      { length: total },
-      (_, i) => `/sequence/${String(i + 1).padStart(5, "0")}.webp`,
-    );
-    const imgArray: (HTMLImageElement | undefined)[] = new Array(total);
-    let settledCount = 0;
-    let nextIndex = 0;
+    const loadFrames = async () => {
+      // Frame 1 doubles as the poster: the hero becomes scrollable as soon as
+      // it lands, and the rest of the sequence streams in behind it.
+      const poster = await loadImage(frameUrl(0));
+      if (cancelled) return;
+      if (poster) {
+        setImages([poster]);
+        setLoaded(true);
+      }
 
-    const loadOne = (url: string, index: number) =>
-      new Promise<void>((resolve) => {
-        const img = new Image();
-        const settle = (succeeded: boolean) => {
-          if (succeeded) imgArray[index] = img;
-          settledCount += 1;
-          setLoadingProgress(Math.round((settledCount / total) * 100));
-          resolve();
-        };
-        img.onload = () => settle(true);
-        img.onerror = () => settle(false);
-        img.src = url;
-      });
+      if (staticMode) return;
 
-    const worker = async () => {
-      while (nextIndex < urls.length && !cancelled) {
-        const index = nextIndex;
-        nextIndex += 1;
-        await loadOne(urls[index], index);
+      const indices: number[] = [];
+      for (let i = FRAME_STEP; i < FRAME_COUNT; i += FRAME_STEP) {
+        indices.push(i);
+      }
+      if (indices[indices.length - 1] !== FRAME_COUNT - 1) {
+        indices.push(FRAME_COUNT - 1);
+      }
+
+      const frames: (HTMLImageElement | undefined)[] = new Array(FRAME_COUNT);
+      frames[0] = poster ?? undefined;
+      let next = 0;
+
+      const worker = async () => {
+        while (next < indices.length && !cancelled) {
+          const index = indices[next];
+          next += 1;
+          const img = await loadImage(frameUrl(index));
+          if (cancelled) return;
+          if (img) frames[index] = img;
+        }
+      };
+
+      await Promise.all(
+        Array.from({ length: Math.min(CONCURRENCY, indices.length) }, () =>
+          worker(),
+        ),
+      );
+      if (cancelled) return;
+
+      const filled = fillFrameGaps(frames);
+      if (filled.length === FRAME_COUNT) {
+        setImages(filled);
+        setLoaded(true);
       }
     };
 
-    void Promise.all(
-      Array.from({ length: Math.min(CONCURRENCY, urls.length) }, () => worker()),
-    ).then(() => {
-      if (cancelled) return;
-      setImages(fillFrameGaps(imgArray));
-      setLoaded(true);
-    });
+    void loadFrames();
 
     return () => {
       cancelled = true;
@@ -117,26 +144,16 @@ export default function DrinkAnimation() {
         <h1 className="sr-only">
           Sinom ARA — Sinom khas Jawa dari daun asam muda, kunyit, dan gula aren
         </h1>
-        <div className="w-48 h-px bg-white/20 rounded-full overflow-hidden mb-6">
-          <div
-            className="h-full bg-white transition-all duration-500 ease-out"
-            style={{ width: `${loadingProgress}%` }}
-          />
-        </div>
         <p
-          role="status"
-          aria-live="polite"
-          className="text-white/70 tracking-[0.25em] text-[11px] uppercase mb-2"
+          aria-hidden="true"
+          className="text-white/80 tracking-[0.4em] text-xs uppercase motion-safe:animate-pulse"
         >
-          Loading {loadingProgress}%
-        </p>
-        <p className="text-white/40 tracking-[0.18em] text-[10px] uppercase font-light">
-          Please wait for the loading to finish
+          Sinom ARA
         </p>
         <button
           type="button"
           onClick={skipToIntro}
-          className="mt-8 px-5 py-2 border border-white/30 text-white/80 hover:bg-white hover:text-black transition-colors duration-300 tracking-[0.2em] text-[11px] uppercase"
+          className="mt-10 min-h-11 px-6 py-3 border border-white/30 text-white/80 hover:bg-white hover:text-black focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)] transition-colors duration-300 tracking-[0.2em] text-[11px] uppercase"
         >
           Lewati Intro
         </button>
@@ -214,11 +231,9 @@ function AnimationSequence({
     if (!img) return;
     if (!(img.complete && img.naturalWidth > 0)) return;
 
-    // Responsive scale: on portrait / mobile screens, prevent extreme close-up over-zoom
-    const isPortrait = w < h;
-    const scale = isPortrait
-      ? Math.min((w / img.width) * 1.45, (h / img.height) * 0.85)
-      : Math.max(w / img.width, h / img.height);
+    // Cover the viewport at every aspect ratio. The old portrait branch
+    // scaled to fit, which letterboxed a 16:9 frame into ~260px black bars.
+    const scale = Math.max(w / img.width, h / img.height);
     const drawW = img.width * scale;
     const drawH = img.height * scale;
     const offsetX = (w - drawW) / 2;
@@ -234,19 +249,29 @@ function AnimationSequence({
     if (!canvas) return;
 
     const sizeCanvas = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      if (canvas.width === w && canvas.height === h) return;
+      // Render at the device pixel ratio (capped at 2) so the canvas is sharp
+      // on phones instead of being upscaled by the compositor.
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const width = Math.round(window.innerWidth * dpr);
+      const height = Math.round(window.innerHeight * dpr);
+      if (canvas.width === width && canvas.height === height) return;
       // Assigning width/height resets the 2D context, so only do it when the
       // viewport actually changed instead of on every animation tick.
-      canvas.width = w;
-      canvas.height = h;
+      canvas.width = width;
+      canvas.height = height;
+    };
+
+    const handleResize = () => {
+      sizeCanvas();
       renderFrame(smoothProgress.get());
     };
 
     sizeCanvas();
-    window.addEventListener("resize", sizeCanvas);
-    return () => window.removeEventListener("resize", sizeCanvas);
+    // Repaint whenever a new image array arrives (poster -> full sequence) or
+    // the viewport changes; otherwise the canvas would keep the old frame.
+    renderFrame(smoothProgress.get());
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [images, smoothProgress]);
 
@@ -306,7 +331,7 @@ function AnimationSequence({
         {/* Beat A — Title */}
         <motion.div
           style={{ opacity: opacityA, y: yA }}
-          className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-6"
+          className="hero-copy-shadow absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-6"
         >
           <h1 className="text-4xl md:text-6xl lg:text-8xl text-white/90 font-light tracking-tight mb-4 md:mb-6 text-center leading-[1.1]">
             SINOM ARA
@@ -319,7 +344,7 @@ function AnimationSequence({
         {/* Beat B — Ingredients, left-aligned */}
         <motion.div
           style={{ opacity: opacityB, y: yB }}
-          className="absolute inset-0 flex flex-col justify-center pointer-events-none px-6 md:px-16 lg:px-32"
+          className="hero-copy-shadow absolute inset-0 flex flex-col justify-center pointer-events-none px-6 md:px-16 lg:px-32"
         >
           <div className="max-w-lg">
             <h2 className="text-3xl md:text-5xl lg:text-6xl text-white/90 font-light tracking-tight mb-4 leading-[1.1]">
@@ -334,7 +359,7 @@ function AnimationSequence({
         {/* Beat C — Character, right-aligned */}
         <motion.div
           style={{ opacity: opacityC, y: yC }}
-          className="absolute inset-0 flex flex-col justify-center items-end pointer-events-none px-6 md:px-16 lg:px-32"
+          className="hero-copy-shadow absolute inset-0 flex flex-col justify-center items-end pointer-events-none px-6 md:px-16 lg:px-32"
         >
           <div className="max-w-lg text-right">
             <h2 className="text-3xl md:text-5xl lg:text-6xl text-white/90 font-light tracking-tight mb-4 leading-[1.1]">
@@ -351,7 +376,7 @@ function AnimationSequence({
             invisible, focusable link in the middle of the hero. */}
         <motion.div
           style={{ opacity: opacityD, y: yD }}
-          className="absolute inset-0 flex flex-col items-center justify-center px-6"
+          className="hero-copy-shadow absolute inset-0 flex flex-col items-center justify-center px-6"
           aria-hidden={!ctaReachable}
           inert={!ctaReachable}
         >
@@ -362,7 +387,7 @@ function AnimationSequence({
             <a
               href="#order"
               tabIndex={ctaReachable ? undefined : -1}
-              className="px-8 py-4 border border-white/40 text-white hover:bg-white hover:text-black transition-all duration-300 tracking-[0.2em] text-xs uppercase"
+              className="hero-cta"
             >
               Pesan Sekarang
             </a>

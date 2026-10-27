@@ -34,7 +34,7 @@ describe("LandingContent", () => {
 
   it("uses one primary verified order action via WhatsApp", () => {
     render(<LandingContent />);
-    const link = screen.getByRole("link", { name: "Order this week on WhatsApp" });
+    const link = screen.getByRole("link", { name: "Pesan Batch Minggu Ini" });
     expect(link).toHaveAttribute("href", expect.stringMatching(/^https:\/\/wa\.me\/62\d+\?text=/));
     expect(link).toHaveAttribute("target", "_blank");
     expect(link).toHaveAttribute("rel", "noopener noreferrer");
@@ -51,8 +51,19 @@ describe("LandingContent", () => {
 
   it("keeps Instagram as a secondary verified destination", () => {
     render(<LandingContent />);
-    const link = screen.getByRole("link", { name: "Visit Sinom ARA on Instagram" });
+    const link = screen.getByRole("link", { name: "Lihat Sinom ARA di Instagram" });
     expect(link).toHaveAttribute("href", "https://www.instagram.com/sinomaramalang/");
+  });
+
+  it("makes each product card a single WhatsApp order link", () => {
+    render(<LandingContent />);
+    const cards = screen.getAllByRole("link", { name: /Pesan via WhatsApp/ });
+    expect(cards).toHaveLength(3);
+    for (const link of cards) {
+      expect(link).toHaveAttribute("href", expect.stringMatching(/^https:\/\/wa\.me\/62\d+\?text=/));
+      expect(link).toHaveAttribute("target", "_blank");
+      expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    }
   });
 
   it("removes unsupported health copy", () => {
@@ -64,6 +75,6 @@ describe("LandingContent", () => {
     const { container } = render(<LandingContent />);
     expect(container.querySelectorAll("motion-reveal").length).toBeGreaterThan(0);
     expect(container.querySelectorAll("motion-stagger").length).toBeGreaterThanOrEqual(2);
-    expect(screen.getByRole("link", { name: "Order this week on WhatsApp" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Pesan Batch Minggu Ini" })).toBeVisible();
   });
 });

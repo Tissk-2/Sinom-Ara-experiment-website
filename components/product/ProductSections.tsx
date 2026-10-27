@@ -3,6 +3,7 @@ import {
   buildWhatsappLink,
   FAQS,
   INGREDIENTS,
+  ORDER_MESSAGE,
   PROCESS_STEPS,
   PRODUCT_DETAILS,
   PRODUCT_FACTS,
@@ -13,15 +14,10 @@ import {
   whatsappOrderMessage,
 } from "./productContent";
 import SpotlightCard from "../reactbits/SpotlightCard";
-import ShinyText from "../reactbits/ShinyText";
 import styles from "./ProductSections.module.css";
 
 function SectionLabel({ children }: Readonly<{ children: React.ReactNode }>) {
-  return (
-    <p className={styles.label}>
-      <ShinyText speed={6}>{children}</ShinyText>
-    </p>
-  );
+  return <p className={styles.label}>{children}</p>;
 }
 
 type NumberedListItem = Readonly<{
@@ -120,7 +116,6 @@ export default function ProductSections() {
       {/* ─── 2. Ingredients ─── */}
       <section id="ingredients" aria-labelledby="ingredients-heading" className={styles.ingredients}>
         <motion-reveal>
-          <SectionLabel>{PRODUCT_FACTS.ingredientEyebrow}</SectionLabel>
           <h2 id="ingredients-heading">{PRODUCT_FACTS.ingredientHeading}</h2>
           <p className={styles.ingredientBody}>{PRODUCT_FACTS.ingredientBody}</p>
         </motion-reveal>
@@ -138,7 +133,6 @@ export default function ProductSections() {
       <section id="produk" aria-labelledby="products-title" className={styles.productsSection}>
         <div className={styles.sectionHeader}>
           <motion-reveal>
-            <SectionLabel>Pilihan Kemasan</SectionLabel>
             <h2 id="products-title">Pilih Ukuran Sesuai Kebutuhanmu</h2>
             <p className={styles.subheading}>
               Harga terjangkau per box dengan kemasan higienis dan bahan alami pilihan.
@@ -148,41 +142,45 @@ export default function ProductSections() {
 
         <motion-stagger interval="0.1" className={styles.productGrid}>
           {PRODUCT_SIZES.map((product) => (
-            <SpotlightCard
-              className={styles.productCard}
+            <a
               key={product.size}
-              spotlightColor="rgba(217, 130, 24, 0.14)"
+              href={buildWhatsappLink(whatsappOrderMessage(product))}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.productCardLink}
             >
-              <div className={styles.productImageWrapper}>
-                <Image
-                  src={product.image}
-                  alt={`Kemasan Sinom ARA ${product.size}`}
-                  width={640}
-                  height={800}
-                  loading="lazy"
-                  className={styles.productImage}
-                />
-                <span className={styles.productSizeBadge}>{product.size}</span>
-              </div>
-              <div className={styles.productCardBody}>
-                <div className={styles.productCardTop}>
-                  <h3 className={styles.productCardTitle}>{product.size}</h3>
-                  <p className={styles.productCardBox}>{product.box}</p>
+              <SpotlightCard
+                className={styles.productCard}
+                spotlightColor="rgba(217, 130, 24, 0.14)"
+              >
+                <div className={styles.productImageWrapper}>
+                  <Image
+                    src={product.image}
+                    alt={`Kemasan Sinom ARA ${product.size}`}
+                    width={640}
+                    height={800}
+                    loading="lazy"
+                    className={styles.productImage}
+                  />
+                  <span aria-hidden="true" className={styles.productSizeBadge}>
+                    {product.size}
+                  </span>
                 </div>
-                <p className={styles.productCardDesc}>{product.description}</p>
-                <div className={styles.productCardFooter}>
-                  <strong className={styles.productPrice}>{product.price}</strong>
-                  <a
-                    href={buildWhatsappLink(whatsappOrderMessage(product))}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.cardOrderLink}
-                  >
-                    Pesan via WhatsApp →
-                  </a>
+                <div className={styles.productCardBody}>
+                  <div className={styles.productCardTop}>
+                    <h3 className={styles.productCardTitle}>{product.size}</h3>
+                    <p className={styles.productCardBox}>{product.box}</p>
+                  </div>
+                  <p className={styles.productCardDesc}>{product.description}</p>
+                  <div className={styles.productCardFooter}>
+                    <strong className={styles.productPrice}>{product.price}</strong>
+                    <span className={styles.cardOrderLink}>
+                      Pesan via WhatsApp <span aria-hidden="true">→</span>
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </SpotlightCard>
+              </SpotlightCard>
+            </a>
           ))}
         </motion-stagger>
       </section>
@@ -201,7 +199,6 @@ export default function ProductSections() {
         </div>
         <div className={styles.detailsContent}>
           <motion-reveal>
-            <SectionLabel>{PRODUCT_DETAILS.kicker}</SectionLabel>
             <h2 id="details-title">{PRODUCT_DETAILS.heading}</h2>
             <p className={styles.detailsBody}>{PRODUCT_DETAILS.body}</p>
             <dl className={styles.factsGrid}>
@@ -249,7 +246,6 @@ export default function ProductSections() {
       <section id="taste-craft" aria-labelledby="taste-heading" className={styles.craft}>
         <div>
           <motion-reveal>
-            <SectionLabel>In the glass</SectionLabel>
             <h2 id="taste-heading">{PRODUCT_FACTS.tasteHeading}</h2>
             <p>{PRODUCT_FACTS.tasteBody}</p>
             <ul className={styles.tasteNotes}>
@@ -260,9 +256,6 @@ export default function ProductSections() {
           </motion-reveal>
         </div>
         <div>
-          <motion-reveal>
-            <SectionLabel>Made with care</SectionLabel>
-          </motion-reveal>
           <NumberedList
             interval="0.1"
             items={PROCESS_STEPS.map((item) => ({
@@ -278,7 +271,6 @@ export default function ProductSections() {
       <section id="faq" aria-labelledby="faq-title" className={styles.faqSection}>
         <motion-reveal>
           <div className={styles.faqHeadingWrapper}>
-            <SectionLabel>Bantuan & Informasi</SectionLabel>
             <h2 id="faq-title">Pertanyaan yang Sering Diajukan</h2>
           </div>
         </motion-reveal>
@@ -299,9 +291,7 @@ export default function ProductSections() {
           <h2 id="order-heading">{PRODUCT_FACTS.orderHeading}</h2>
           <p>{PRODUCT_FACTS.orderBody}</p>
           <a
-            href={buildWhatsappLink(
-              "Halo Sinom ARA! Saya ingin tanya ketersediaan batch minggu ini.",
-            )}
+            href={buildWhatsappLink(ORDER_MESSAGE)}
             target="_blank"
             rel="noopener noreferrer"
             className={styles.primaryCta}
@@ -331,7 +321,7 @@ export default function ProductSections() {
             href={PRODUCT_FACTS.instagramUrl}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Visit Sinom ARA on Instagram"
+            aria-label="Lihat Sinom ARA di Instagram"
           >
             Instagram
           </a>

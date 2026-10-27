@@ -11,7 +11,7 @@
   }
 
   html {
-    font-size: 90%;
+    font-size: 100%;
     scroll-behavior: smooth;
     scroll-snap-type: y proximity;
     overflow-x: clip;
@@ -29,6 +29,52 @@
 
 .snap-point {
   scroll-snap-align: start;
+}
+
+/* Hero copy sits directly on photography; the shadow keeps it legible where
+   the frame crops to bright highlights. */
+.hero-copy-shadow {
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.55);
+}
+
+.hero-cta {
+  display: inline-flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.9rem 2rem;
+  border-radius: 999px;
+  background: #f4efe4;
+  color: #14120f;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  text-shadow: none;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+  transition: background-color 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hero-cta:hover {
+  background: #ffffff;
+}
+
+.hero-cta:active {
+  transform: scale(0.97);
+}
+
+.hero-cta:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-cta {
+    transition-duration: 0.01ms;
+  }
 }
 
 /* Custom minimal dark scrollbar */

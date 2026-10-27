@@ -15,7 +15,7 @@ test("shows the product story and verified order action", async ({ page }) => {
       page.getByRole("img", { name: `Kemasan Sinom ARA ${name}` }),
     ).toBeVisible();
   }
-  const link = page.getByRole("link", { name: "Order this week on WhatsApp" }).first();
+  const link = page.getByRole("link", { name: "Pesan Batch Minggu Ini" }).first();
   await link.scrollIntoViewIfNeeded();
   await expect(link).toHaveAttribute("href", WA_ORDER_LINK);
 });
@@ -43,9 +43,9 @@ test("shows the reseller action", async ({ page }) => {
 test("the hero CTA is not reachable before it fades in", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   const cta = page.locator('a[href="#order"]').first();
-  // The hero only mounts once all 192 frames have loaded, and on a cold run
-  // that takes longer than the default assertion timeout.
-  await expect(cta).toHaveCount(1, { timeout: 120_000 });
+  // The hero mounts as soon as the poster frame lands; the rest of the
+  // sequence streams in behind it, so this is quick even on a cold run.
+  await expect(cta).toHaveCount(1, { timeout: 30_000 });
   // Still at the top of the page, so Beat D has not faded in yet. Opacity
   // alone would leave an invisible but tabbable link, so the wrapper is inert
   // and the anchor is out of the tab order.
@@ -54,15 +54,26 @@ test("the hero CTA is not reachable before it fades in", async ({ page }) => {
 });
 
 test("product cards carry prefilled WhatsApp order messages", async ({ page }) => {
-  const card = page.getByRole("link", { name: "Pesan via WhatsApp →" }).first();
+  const card = page.getByRole("link", { name: /275 ml/ }).first();
   await card.scrollIntoViewIfNeeded();
   const href = await card.getAttribute("href");
   expect(href).toMatch(WA_ORDER_LINK);
   expect(decodeURIComponent(href ?? "")).toContain("275 ml");
 });
 
+test("offers a persistent order shortcut once the story begins", async ({ page }) => {
+  // `exact` keeps the bar distinct from the card links, whose accessible
+  // names also end in "Pesan via WhatsApp".
+  const bar = page.getByRole("link", { name: "Pesan via WhatsApp", exact: true });
+  await page.locator("#produk").scrollIntoViewIfNeeded();
+  await expect(bar).toBeVisible();
+  await expect(bar).toHaveAttribute("href", WA_ORDER_LINK);
+  await page.getByRole("button", { name: "Tutup bilah pesan" }).click();
+  await expect(bar).toHaveCount(0);
+});
+
 test("has no horizontal overflow and exposes keyboard focus", async ({ page }) => {
-  const link = page.getByRole("link", { name: "Order this week on WhatsApp" }).first();
+  const link = page.getByRole("link", { name: "Pesan Batch Minggu Ini" }).first();
   await link.scrollIntoViewIfNeeded();
   await link.focus();
   await expect(link).toBeFocused();
@@ -85,7 +96,7 @@ test("keeps content and ordering usable without JavaScript", async ({ browser })
   const page = await context.newPage();
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.locator("#order").scrollIntoViewIfNeeded();
-  await expect(page.getByRole("link", { name: "Order this week on WhatsApp" }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: "Pesan Batch Minggu Ini" }).first()).toBeVisible();
   await expect(page.getByRole("link", { name: "Lihat aktivitas kami di Instagram" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Tanya Program Reseller" })).toBeVisible();
   await context.close();

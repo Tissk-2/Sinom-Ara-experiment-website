@@ -20,6 +20,9 @@ export function whatsappOrderMessage(product: Readonly<{
   return `Halo Sinom ARA! Saya mau pesan kemasan ${product.size} (${product.box}, ${product.price}). Masih tersedia untuk batch minggu ini?`;
 }
 
+export const ORDER_MESSAGE =
+  "Halo Sinom ARA! Saya ingin tanya ketersediaan batch minggu ini.";
+
 export const PRODUCT_FACTS = Object.freeze({
   brand: "Sinom ARA",
   location: "Malang, East Java",
@@ -27,7 +30,6 @@ export const PRODUCT_FACTS = Object.freeze({
   originHeading: "A Javanese classic, brewed for right now.",
   originBody:
     "Sinom ARA menghadirkan kesegaran khas Jawa lewat ritual seduh small-batch yang telaten. Tiga bahan alami, tanpa pengawet buatan, tanpa jalan pintas.",
-  ingredientEyebrow: "What goes in",
   ingredientHeading: "Three ingredients, held in balance.",
   ingredientBody:
     "Tiga bahan alami, tanpa pengawet buatan. Asam yang menyegarkan, hangat yang membumi, dan manis yang menyeimbangkan.",
@@ -38,7 +40,7 @@ export const PRODUCT_FACTS = Object.freeze({
   orderHeading: "Freshly brewed. Ready when the batch is.",
   orderBody:
     "Sinom ARA diseduh setiap minggu di Malang. Tanyakan batch terbaru dan pesan langsung melalui WhatsApp kami.",
-  orderLabel: "Order this week on WhatsApp",
+  orderLabel: "Pesan Batch Minggu Ini",
   instagramUrl: "https://www.instagram.com/sinomaramalang/",
   instagramLabel: "Lihat aktivitas kami di Instagram",
 } as const);
@@ -107,7 +109,6 @@ export const PRODUCT_SIZES = Object.freeze([
 
 export const PRODUCT_DETAILS = Object.freeze({
   image: "/images/ara-sinom-lineup.jpg",
-  kicker: "Gula Asli & Alami",
   heading: "Teman segar untuk hari-harimu",
   body: "Tersedia dalam pilihan kemasan botol dan cup yang praktis. Dinginkan sebelum dinikmati untuk rasa dan kesegaran terbaik.",
   facts: Object.freeze([
