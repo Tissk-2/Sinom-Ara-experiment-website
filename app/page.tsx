@@ -1,9 +1,12 @@
 import DrinkAnimation from "@/components/DrinkAnimation";
 import LandingContent from "@/components/LandingContent";
+import SkipLink from "@/components/SkipLink";
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-[var(--bg)]">
+      <SkipLink />
+
       {/* Hero — Scrollytelling Animation */}
       <DrinkAnimation />
 

@@ -72,6 +72,17 @@ test("offers a persistent order shortcut once the story begins", async ({ page }
   await expect(bar).toHaveCount(0);
 });
 
+test("lets keyboard users skip the hero and land on the products", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.keyboard.press("Tab");
+  const skip = page.getByRole("link", { name: "Lewati ke produk" });
+  await expect(skip).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/#produk$/);
+  await expect(page.locator("#produk")).toBeFocused();
+  await expect(page.locator("#produk")).toBeInViewport();
+});
+
 test("has no horizontal overflow and exposes keyboard focus", async ({ page }) => {
   const link = page.getByRole("link", { name: "Pesan Batch Minggu Ini" }).first();
   await link.scrollIntoViewIfNeeded();

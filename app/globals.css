@@ -31,6 +31,30 @@
   scroll-snap-align: start;
 }
 
+.skip-link {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 60;
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  border-radius: 999px;
+  background: #f4efe4;
+  color: #14120f;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(calc(-100% - 1.5rem));
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+  outline: 2px solid #14120f;
+  outline-offset: 3px;
+}
+
 /* Hero copy sits directly on photography; the shadow keeps it legible where
    the frame crops to bright highlights. */
 .hero-copy-shadow {

@@ -38,9 +38,18 @@ type NumberedListItem = Readonly<{
 function NumberedList({
   items,
   interval,
-}: Readonly<{ items: readonly NumberedListItem[]; interval: string }>) {
+  className,
+}: Readonly<{
+  items: readonly NumberedListItem[];
+  interval: string;
+  className?: string;
+}>) {
   return (
-    <motion-stagger interval={interval} role="list" className={styles.numberedList}>
+    <motion-stagger
+      interval={interval}
+      role="list"
+      className={className ? `${styles.numberedList} ${className}` : styles.numberedList}
+    >
       {items.map((item) => (
         <div key={item.number} role="listitem" className={styles.numberedItem}>
           <span aria-hidden="true">{item.number}</span>
@@ -115,10 +124,10 @@ export default function ProductSections() {
 
       {/* ─── 2. Ingredients ─── */}
       <section id="ingredients" aria-labelledby="ingredients-heading" className={styles.ingredients}>
-        <motion-reveal>
+        <div>
           <h2 id="ingredients-heading">{PRODUCT_FACTS.ingredientHeading}</h2>
           <p className={styles.ingredientBody}>{PRODUCT_FACTS.ingredientBody}</p>
-        </motion-reveal>
+        </div>
         <NumberedList
           interval="0.12"
           items={INGREDIENTS.map((item) => ({
@@ -130,7 +139,12 @@ export default function ProductSections() {
       </section>
 
       {/* ─── 3. Product Lineup / Pilihan Ukuran with React Bits SpotlightCards ─── */}
-      <section id="produk" aria-labelledby="products-title" className={styles.productsSection}>
+      <section
+        id="produk"
+        tabIndex={-1}
+        aria-labelledby="products-title"
+        className={styles.productsSection}
+      >
         <div className={styles.sectionHeader}>
           <motion-reveal>
             <h2 id="products-title">Pilih Ukuran Sesuai Kebutuhanmu</h2>
@@ -198,82 +212,77 @@ export default function ProductSections() {
           />
         </div>
         <div className={styles.detailsContent}>
-          <motion-reveal>
-            <h2 id="details-title">{PRODUCT_DETAILS.heading}</h2>
-            <p className={styles.detailsBody}>{PRODUCT_DETAILS.body}</p>
-            <dl className={styles.factsGrid}>
-              {PRODUCT_DETAILS.facts.map((fact) => (
-                <div key={fact.label} className={styles.factItem}>
-                  <dt>{fact.label}</dt>
-                  <dd>{fact.value}</dd>
-                </div>
-              ))}
-            </dl>
-          </motion-reveal>
+          <h2 id="details-title">{PRODUCT_DETAILS.heading}</h2>
+          <p className={styles.detailsBody}>{PRODUCT_DETAILS.body}</p>
+          <dl className={styles.factsGrid}>
+            {PRODUCT_DETAILS.facts.map((fact) => (
+              <div key={fact.label} className={styles.factItem}>
+                <dt>{fact.label}</dt>
+                <dd>{fact.value}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
       </section>
 
       {/* ─── 5. Reseller / Partnership ─── */}
       <section id="reseller" aria-labelledby="reseller-title" className={styles.reseller}>
-        <div className={styles.resellerImageWrapper}>
-          <Image
-            src={RESELLER_INFO.image}
-            alt="Kemasan Sinom ARA untuk mitra reseller dan dropship"
-            width={640}
-            height={800}
-            loading="lazy"
-            className={styles.resellerImage}
-          />
-        </div>
-        <div className={styles.resellerContent}>
-          <motion-reveal>
-            <SectionLabel>{RESELLER_INFO.kicker}</SectionLabel>
-            <h2 id="reseller-title">{RESELLER_INFO.heading}</h2>
-            <p className={styles.resellerBody}>{RESELLER_INFO.body}</p>
-            <a
-              href={buildWhatsappLink(RESELLER_INFO.ctaMessage)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.resellerCta}
-            >
-              {RESELLER_INFO.ctaLabel}
-            </a>
-          </motion-reveal>
+        <div className={styles.resellerInner}>
+          <div className={styles.resellerImageWrapper}>
+            <Image
+              src={RESELLER_INFO.image}
+              alt="Kemasan Sinom ARA untuk mitra reseller dan dropship"
+              width={640}
+              height={800}
+              loading="lazy"
+              className={styles.resellerImage}
+            />
+          </div>
+          <div className={styles.resellerContent}>
+            <motion-reveal>
+              <SectionLabel>{RESELLER_INFO.kicker}</SectionLabel>
+              <h2 id="reseller-title">{RESELLER_INFO.heading}</h2>
+              <p className={styles.resellerBody}>{RESELLER_INFO.body}</p>
+              <a
+                href={buildWhatsappLink(RESELLER_INFO.ctaMessage)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.resellerCta}
+              >
+                {RESELLER_INFO.ctaLabel}
+              </a>
+            </motion-reveal>
+          </div>
         </div>
       </section>
 
-      {/* ─── 6. Taste & Craft ─── */}
+      {/* ─── 6. Taste & Process Strip ─── */}
       <section id="taste-craft" aria-labelledby="taste-heading" className={styles.craft}>
-        <div>
-          <motion-reveal>
-            <h2 id="taste-heading">{PRODUCT_FACTS.tasteHeading}</h2>
-            <p>{PRODUCT_FACTS.tasteBody}</p>
-            <ul className={styles.tasteNotes}>
-              {TASTE_NOTES.map((note) => (
-                <li key={note}>{note}</li>
-              ))}
-            </ul>
-          </motion-reveal>
-        </div>
-        <div>
-          <NumberedList
-            interval="0.1"
-            items={PROCESS_STEPS.map((item) => ({
-              number: item.number,
-              title: item.title,
-              description: item.description,
-            }))}
-          />
-        </div>
+        <motion-reveal className={styles.craftIntro}>
+          <h2 id="taste-heading">{PRODUCT_FACTS.tasteHeading}</h2>
+          <p>{PRODUCT_FACTS.tasteBody}</p>
+          <ul className={styles.tasteNotes}>
+            {TASTE_NOTES.map((note) => (
+              <li key={note}>{note}</li>
+            ))}
+          </ul>
+        </motion-reveal>
+        <NumberedList
+          className={styles.processStrip}
+          interval="0.1"
+          items={PROCESS_STEPS.map((item) => ({
+            number: item.number,
+            title: item.title,
+            description: item.description,
+          }))}
+        />
       </section>
 
       {/* ─── 7. FAQ Accordion ─── */}
       <section id="faq" aria-labelledby="faq-title" className={styles.faqSection}>
-        <motion-reveal>
-          <div className={styles.faqHeadingWrapper}>
-            <h2 id="faq-title">Pertanyaan yang Sering Diajukan</h2>
-          </div>
-        </motion-reveal>
+        <div className={styles.faqHeadingWrapper}>
+          <h2 id="faq-title">Pertanyaan yang Sering Diajukan</h2>
+        </div>
         <div className={styles.faqList}>
           {FAQS.map((faq) => (
             <details key={faq.question} className={styles.faqDetail}>
