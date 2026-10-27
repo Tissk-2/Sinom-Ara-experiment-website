@@ -55,6 +55,17 @@ export default function StickyOrderBar() {
       aria-hidden={!visible}
       inert={!visible}
     >
+      <nav aria-label="Navigasi halaman" className={styles.nav}>
+        <a href="#produk" className={styles.navLink} tabIndex={visible ? undefined : -1}>
+          Produk
+        </a>
+        <a href="#reseller" className={styles.navLink} tabIndex={visible ? undefined : -1}>
+          Reseller
+        </a>
+        <a href="#faq" className={styles.navLink} tabIndex={visible ? undefined : -1}>
+          FAQ
+        </a>
+      </nav>
       <a
         href={buildWhatsappLink(ORDER_MESSAGE)}
         target="_blank"

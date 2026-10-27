@@ -59,6 +59,21 @@ test("product cards carry prefilled WhatsApp order messages", async ({ page }) =
   const href = await card.getAttribute("href");
   expect(href).toMatch(WA_ORDER_LINK);
   expect(decodeURIComponent(href ?? "")).toContain("275 ml");
+  await expect(card.getByText("10 pcs / box")).toBeVisible();
+});
+
+test("offers section navigation from the sticky bar on desktop", async ({ page }) => {
+  test.skip((page.viewportSize()?.width ?? 0) <= 720, "compact bar hides links on phones");
+  await page.locator("#produk").scrollIntoViewIfNeeded();
+  const nav = page.getByRole("navigation", { name: "Navigasi halaman" });
+  await expect(nav.getByRole("link", { name: "Produk" })).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Reseller" })).toBeVisible();
+  const faq = nav.getByRole("link", { name: "FAQ" });
+  await expect(faq).toBeVisible();
+  await faq.click();
+  await expect(page).toHaveURL(/#faq$/);
+  await expect(page.locator("#faq")).toBeFocused();
+  await expect(page.locator("#faq")).toBeInViewport();
 });
 
 test("offers a persistent order shortcut once the story begins", async ({ page }) => {

@@ -25,6 +25,46 @@
   pointer-events: auto;
 }
 
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  margin-right: 0.125rem;
+  padding-right: 0.35rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.navLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 0.7rem;
+  border-radius: 999px;
+  color: #c9c4b8;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 200ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.navLink:hover {
+  color: #ffffff;
+}
+
+.navLink:focus-visible {
+  outline: 2px solid #f6f3ec;
+  outline-offset: 2px;
+}
+
+@media (max-width: 720px) {
+  .nav {
+    display: none;
+  }
+}
+
 .cta {
   display: inline-flex;
   align-items: center;

@@ -111,10 +111,11 @@ export default function ProductSections() {
         </div>
         <div className={styles.originImageWrapper}>
           <Image
-            src="/images/ara-sinom-hero.jpg"
+            src="/images/sinom-hero.jpg"
             alt="Sinom ARA botol segar dalam genggaman"
-            width={512}
-            height={640}
+            width={1024}
+            height={1280}
+            sizes="(max-width: 960px) 100vw, 50vw"
             loading="eager"
             className={styles.originImage}
           />
@@ -171,23 +172,22 @@ export default function ProductSections() {
                   <Image
                     src={product.image}
                     alt={`Kemasan Sinom ARA ${product.size}`}
-                    width={640}
-                    height={800}
+                    width={1024}
+                    height={1280}
+                    sizes="(max-width: 767px) 92vw, (max-width: 1100px) 45vw, 30vw"
                     loading="lazy"
                     className={styles.productImage}
                   />
-                  <span aria-hidden="true" className={styles.productSizeBadge}>
-                    {product.size}
-                  </span>
+                  <span className={styles.productSizeBadge}>{product.box}</span>
                 </div>
                 <div className={styles.productCardBody}>
-                  <div className={styles.productCardTop}>
-                    <h3 className={styles.productCardTitle}>{product.size}</h3>
-                    <p className={styles.productCardBox}>{product.box}</p>
-                  </div>
+                  <h3 className={styles.productCardTitle}>{product.size}</h3>
                   <p className={styles.productCardDesc}>{product.description}</p>
                   <div className={styles.productCardFooter}>
-                    <strong className={styles.productPrice}>{product.price}</strong>
+                    <strong className={styles.productPrice}>
+                      {product.price}
+                      <span className={styles.priceUnit}> / box</span>
+                    </strong>
                     <span className={styles.cardOrderLink}>
                       Pesan via WhatsApp <span aria-hidden="true">→</span>
                     </span>
@@ -205,8 +205,9 @@ export default function ProductSections() {
           <Image
             src={PRODUCT_DETAILS.image}
             alt="Pilihan kemasan botol dan cup Sinom ARA"
-            width={640}
-            height={800}
+            width={1024}
+            height={1280}
+            sizes="(max-width: 960px) 100vw, 48vw"
             loading="lazy"
             className={styles.detailsImage}
           />
@@ -226,14 +227,20 @@ export default function ProductSections() {
       </section>
 
       {/* ─── 5. Reseller / Partnership ─── */}
-      <section id="reseller" aria-labelledby="reseller-title" className={styles.reseller}>
+      <section
+        id="reseller"
+        aria-labelledby="reseller-title"
+        tabIndex={-1}
+        className={styles.reseller}
+      >
         <div className={styles.resellerInner}>
           <div className={styles.resellerImageWrapper}>
             <Image
               src={RESELLER_INFO.image}
               alt="Kemasan Sinom ARA untuk mitra reseller dan dropship"
-              width={640}
-              height={800}
+              width={1024}
+              height={1280}
+              sizes="(max-width: 960px) 100vw, 45vw"
               loading="lazy"
               className={styles.resellerImage}
             />
@@ -279,7 +286,7 @@ export default function ProductSections() {
       </section>
 
       {/* ─── 7. FAQ Accordion ─── */}
-      <section id="faq" aria-labelledby="faq-title" className={styles.faqSection}>
+      <section id="faq" aria-labelledby="faq-title" tabIndex={-1} className={styles.faqSection}>
         <div className={styles.faqHeadingWrapper}>
           <h2 id="faq-title">Pertanyaan yang Sering Diajukan</h2>
         </div>

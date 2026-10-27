@@ -172,9 +172,11 @@
 }
 
 /* ─── 3. Products Grid ─── */
-.productsSection:focus {
-  /* The skip link targets this section; a full-page focus rectangle adds
-     noise without telling anyone where they landed. */
+.productsSection:focus,
+.reseller:focus,
+.faqSection:focus {
+  /* The skip link and sticky nav target these sections; a full-page focus
+     rectangle adds noise without telling anyone where they landed. */
   outline: none;
 }
 
@@ -267,24 +269,10 @@
   gap: 0.85rem;
 }
 
-.productCardTop {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 0.5rem;
-}
-
 .productCardTitle {
   font-size: 1.4rem;
   font-weight: 600;
   margin: 0;
-}
-
-.productCardBox {
-  font-size: 0.8rem;
-  color: var(--product-muted);
-  margin: 0;
-  letter-spacing: 0.05em;
 }
 
 .productCardDesc {
@@ -308,6 +296,13 @@
   font-size: 1.4rem;
   font-weight: 700;
   letter-spacing: -0.02em;
+}
+
+.priceUnit {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--product-muted);
 }
 
 .cardOrderLink {

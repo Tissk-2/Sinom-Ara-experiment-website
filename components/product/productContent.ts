@@ -88,27 +88,27 @@ export const PRODUCT_SIZES = Object.freeze([
     size: "275 ml",
     box: "10 pcs / box",
     price: "Rp48.000",
-    image: "/images/ara-sinom-bottle.jpg",
-    description: "Botol kaca signature, cocok untuk berbagi atau stok mingguan.",
+    image: "/images/sinom-275ml.jpg",
+    description: "Botol signature, cocok untuk berbagi atau stok mingguan.",
   }),
   Object.freeze({
     size: "180 ml",
     box: "24 pcs / box",
     price: "Rp39.000",
-    image: "/images/ara-sinom-options.jpg",
-    description: "Kemasan botol ringkas, pas untuk teman minum sehari-hari.",
+    image: "/images/sinom-180ml.jpg",
+    description: "Kemasan cup ringkas, pas untuk teman minum sehari-hari.",
   }),
   Object.freeze({
     size: "120 ml",
     box: "24 pcs / box",
     price: "Rp35.000",
-    image: "/images/ara-sinom-lineup.jpg",
+    image: "/images/sinom-120ml.jpg",
     description: "Format cup praktis, ideal untuk acara, rapat, dan santap bareng.",
   }),
 ] as const);
 
 export const PRODUCT_DETAILS = Object.freeze({
-  image: "/images/ara-sinom-lineup.jpg",
+  image: "/images/sinom-lineup.jpg",
   heading: "Teman segar untuk hari-harimu",
   body: "Tersedia dalam pilihan kemasan botol dan cup yang praktis. Dinginkan sebelum dinikmati untuk rasa dan kesegaran terbaik.",
   facts: Object.freeze([
@@ -119,7 +119,7 @@ export const PRODUCT_DETAILS = Object.freeze({
 } as const);
 
 export const RESELLER_INFO = Object.freeze({
-  image: "/images/ara-sinom-reseller.jpg",
+  image: "/images/sinom-reseller.jpg",
   kicker: "Tumbuh Bersama",
   heading: "Buka peluang reseller dan dropship",
   body: "Bawa kesegaran Sinom ARA ke pelanggan di kotamu. Dapatkan penawaran harga khusus mitra dengan pengiriman aman ke seluruh Indonesia.",
