@@ -6,10 +6,41 @@ import { motion, useTransform, useMotionValueEvent, useMotionValue, useSpring } 
 const FRAME_COUNT = 192;
 const CONCURRENCY = 16;
 
+/**
+ * Progress at which Beat D (the closing CTA) begins to fade in. Kept in sync
+ * with the opacityD transform range below.
+ */
+const CTA_REVEAL_PROGRESS = 0.85;
+
 function subscribePrefersReducedMotion(callback: () => void) {
   const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   mediaQuery.addEventListener("change", callback);
   return () => mediaQuery.removeEventListener("change", callback);
+}
+
+/**
+ * Replaces failed frames with the nearest successfully loaded frame so the
+ * array keeps its original length. Dropping the holes instead would shift
+ * every later frame earlier and desynchronise the scroll timeline; leaving
+ * them empty would render a black canvas.
+ */
+function fillFrameGaps(
+  frames: (HTMLImageElement | undefined)[],
+): HTMLImageElement[] {
+  const filled: HTMLImageElement[] = [];
+  let lastGood: HTMLImageElement | undefined;
+
+  for (const frame of frames) {
+    if (frame) lastGood = frame;
+    if (lastGood) filled.push(lastGood);
+  }
+
+  // If the very first frames failed, backfill them from the first good frame.
+  while (filled.length < frames.length && filled.length > 0) {
+    filled.unshift(filled[0]);
+  }
+
+  return filled;
 }
 
 export default function DrinkAnimation() {
@@ -35,7 +66,7 @@ export default function DrinkAnimation() {
       { length: total },
       (_, i) => `/sequence/${String(i + 1).padStart(5, "0")}.webp`,
     );
-    const imgArray: HTMLImageElement[] = new Array(total);
+    const imgArray: (HTMLImageElement | undefined)[] = new Array(total);
     let settledCount = 0;
     let nextIndex = 0;
 
@@ -65,7 +96,7 @@ export default function DrinkAnimation() {
       Array.from({ length: Math.min(CONCURRENCY, urls.length) }, () => worker()),
     ).then(() => {
       if (cancelled) return;
-      setImages(imgArray.filter(Boolean));
+      setImages(fillFrameGaps(imgArray));
       setLoaded(true);
     });
 
@@ -81,6 +112,11 @@ export default function DrinkAnimation() {
   if (!loaded) {
     return (
       <div className="min-h-[100dvh] w-full flex flex-col items-center justify-center bg-[var(--bg)] text-white select-none px-6">
+        {/* Server-rendered H1: crawlers and link-preview scrapers never execute the
+            scroll animation, so this is the only heading they receive. */}
+        <h1 className="sr-only">
+          Sinom ARA — Sinom khas Jawa dari daun asam muda, kunyit, dan gula aren
+        </h1>
         <div className="w-48 h-px bg-white/20 rounded-full overflow-hidden mb-6">
           <div
             className="h-full bg-white transition-all duration-500 ease-out"
@@ -121,6 +157,7 @@ function AnimationSequence({
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rawProgress = useMotionValue(0);
+  const [ctaReachable, setCtaReachable] = useState(false);
 
   // Responsive spring physics: swift, effortless feel with smooth deceleration
   const smoothProgress = useSpring(rawProgress, {
@@ -160,16 +197,17 @@ function AnimationSequence({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    canvas.width = w;
-    canvas.height = h;
+    // Canvas backing size is managed by the resize effect; reading it here
+    // avoids resetting the context (and losing cleared state) on every tick.
+    const w = canvas.width;
+    const h = canvas.height;
+    if (w === 0 || h === 0) return;
 
     // The animation reaches its full splash climax (frame 192) at progress = 1.25 (where only the top splash is visible)
     const animationProgress = Math.min(1, progressValue / 1.25);
     const frameIndex = Math.min(
-      FRAME_COUNT - 1,
-      Math.max(0, Math.round(animationProgress * (FRAME_COUNT - 1)))
+      images.length - 1,
+      Math.max(0, Math.round(animationProgress * (images.length - 1)))
     );
 
     const img = images[frameIndex];
@@ -192,15 +230,31 @@ function AnimationSequence({
   };
 
   useEffect(() => {
-    renderFrame(smoothProgress.get());
-    const handleResize = () => renderFrame(smoothProgress.get());
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const sizeCanvas = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      if (canvas.width === w && canvas.height === h) return;
+      // Assigning width/height resets the 2D context, so only do it when the
+      // viewport actually changed instead of on every animation tick.
+      canvas.width = w;
+      canvas.height = h;
+      renderFrame(smoothProgress.get());
+    };
+
+    sizeCanvas();
+    window.addEventListener("resize", sizeCanvas);
+    return () => window.removeEventListener("resize", sizeCanvas);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [images, smoothProgress]);
 
   useMotionValueEvent(smoothProgress, "change", (latest) => {
     renderFrame(latest);
+    // Beat D starts fading in at 0.85; until then its CTA is invisible, so it
+    // must not be clickable or reachable by keyboard.
+    setCtaReachable(latest >= CTA_REVEAL_PROGRESS);
   });
 
   // Beat A: Opening (Hold 0–16%, completely fade out by 22%)
@@ -292,10 +346,14 @@ function AnimationSequence({
           </div>
         </motion.div>
 
-        {/* Beat D — CTA */}
+        {/* Beat D — CTA. Hidden from interaction and assistive technology until
+            the beat has actually faded in; opacity alone would leave an
+            invisible, focusable link in the middle of the hero. */}
         <motion.div
           style={{ opacity: opacityD, y: yD }}
-          className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-6"
+          className="absolute inset-0 flex flex-col items-center justify-center px-6"
+          aria-hidden={!ctaReachable}
+          inert={!ctaReachable}
         >
           <h2 className="text-4xl md:text-5xl lg:text-7xl text-white/90 font-light tracking-tight mb-8 text-center leading-[1.1]">
             GET YOURS
@@ -303,7 +361,8 @@ function AnimationSequence({
           <motion-magnetic>
             <a
               href="#order"
-              className="px-8 py-4 border border-white/40 text-white hover:bg-white hover:text-black transition-all duration-300 tracking-[0.2em] text-xs uppercase pointer-events-auto"
+              tabIndex={ctaReachable ? undefined : -1}
+              className="px-8 py-4 border border-white/40 text-white hover:bg-white hover:text-black transition-all duration-300 tracking-[0.2em] text-xs uppercase"
             >
               Pesan Sekarang
             </a>

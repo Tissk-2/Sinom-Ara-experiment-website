@@ -20,6 +20,39 @@ test("shows the product story and verified order action", async ({ page }) => {
   await expect(link).toHaveAttribute("href", WA_ORDER_LINK);
 });
 
+test("shows the three verified ingredients", async ({ page }) => {
+  const section = page.locator("#ingredients");
+  await section.scrollIntoViewIfNeeded();
+  await expect(
+    page.getByRole("heading", { name: "Three ingredients, held in balance." }),
+  ).toBeVisible();
+  for (const name of ["Young tamarind leaves", "Fresh turmeric", "Palm sugar"]) {
+    await expect(page.getByRole("heading", { name })).toBeVisible();
+  }
+  await expect(section.getByRole("listitem")).toHaveCount(3);
+});
+
+test("shows the reseller action", async ({ page }) => {
+  const link = page.getByRole("link", { name: "Tanya Program Reseller" });
+  await link.scrollIntoViewIfNeeded();
+  const href = await link.getAttribute("href");
+  expect(href).toMatch(WA_ORDER_LINK);
+  expect(decodeURIComponent(href ?? "")).toContain("reseller");
+});
+
+test("the hero CTA is not reachable before it fades in", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const cta = page.locator('a[href="#order"]').first();
+  // The hero only mounts once all 192 frames have loaded, and on a cold run
+  // that takes longer than the default assertion timeout.
+  await expect(cta).toHaveCount(1, { timeout: 120_000 });
+  // Still at the top of the page, so Beat D has not faded in yet. Opacity
+  // alone would leave an invisible but tabbable link, so the wrapper is inert
+  // and the anchor is out of the tab order.
+  await expect(cta).toHaveAttribute("tabindex", "-1");
+  await expect(cta.locator("xpath=ancestor::*[@inert]")).toHaveCount(1);
+});
+
 test("product cards carry prefilled WhatsApp order messages", async ({ page }) => {
   const card = page.getByRole("link", { name: "Pesan via WhatsApp →" }).first();
   await card.scrollIntoViewIfNeeded();
@@ -52,20 +85,31 @@ test("keeps content and ordering usable without JavaScript", async ({ browser })
   const page = await context.newPage();
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.locator("#order").scrollIntoViewIfNeeded();
-  await expect(page.getByRole("link", { name: "Order this week on Instagram" })).toBeHidden();
   await expect(page.getByRole("link", { name: "Order this week on WhatsApp" }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: "Lihat aktivitas kami di Instagram" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Tanya Program Reseller" })).toBeVisible();
   await context.close();
 });
 
 test("matches the reviewed below-animation composition", async ({ page }) => {
+  // Capture in reduced-motion mode. motion-reveal/motion-stagger set their
+  // opacity from JS and reveal via IntersectionObserver, so under smooth
+  // scrolling their state at snapshot time is timing-dependent. With reduced
+  // motion they render fully opaque immediately, which makes this a stable
+  // test of the layout and typography (the behaviour itself is covered by the
+  // dedicated reduced-motion test below).
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.reload({ waitUntil: "domcontentloaded" });
+
   const content = page.locator("[data-product-content]");
   await page.evaluate(async () => {
-    const totalHeight = document.body.scrollHeight;
-    for (let y = 0; y < totalHeight; y += 350) {
+    const total = document.body.scrollHeight;
+    for (let y = 0; y < total; y += 350) {
       window.scrollTo(0, y);
       await new Promise((r) => setTimeout(r, 60));
     }
   });
+
   await page.waitForFunction(() => {
     const images = Array.from(
       document.querySelectorAll("[data-product-content] img"),
@@ -75,6 +119,7 @@ test("matches the reviewed below-animation composition", async ({ page }) => {
       images.every((img) => img.complete && img.naturalWidth > 0)
     );
   });
+
   await content.scrollIntoViewIfNeeded();
   await page.waitForTimeout(600);
   await expect(content).toHaveScreenshot("product-content.png", {

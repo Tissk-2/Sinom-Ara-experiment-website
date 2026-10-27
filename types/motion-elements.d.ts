@@ -6,11 +6,9 @@ type MotionProps = React.DetailedHTMLProps<
 >;
 
 declare module "react" {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
       "motion-magnetic": MotionProps;
-      "motion-split": MotionProps & { animation?: string };
       "motion-reveal": MotionProps & { animation?: string; delay?: string };
       "motion-stagger": MotionProps & { interval?: string };
       "motion-hover": MotionProps & {

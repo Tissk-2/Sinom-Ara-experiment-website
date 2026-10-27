@@ -17,6 +17,9 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: "Sinom ARA — Tradition in Every Sip",
   description: siteDescription,
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     title: "Sinom ARA — Tradition in Every Sip",
     description: siteDescription,
@@ -24,13 +27,20 @@ export const metadata: Metadata = {
     siteName: "Sinom ARA",
     locale: "id_ID",
     type: "website",
-    images: [{ url: "/images/ara-sinom-social-card.png", alt: "Sinom ARA" }],
+    images: [
+      {
+        url: "/images/ara-sinom-social-card.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Sinom ARA — sinom khas Jawa dari daun asam muda, kunyit, dan gula aren",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Sinom ARA — Tradition in Every Sip",
     description: siteDescription,
-    images: ["/images/ara-sinom-social-card.png"],
+    images: ["/images/ara-sinom-social-card.jpg"],
   },
 };
 

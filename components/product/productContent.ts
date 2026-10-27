@@ -27,7 +27,10 @@ export const PRODUCT_FACTS = Object.freeze({
   originHeading: "A Javanese classic, brewed for right now.",
   originBody:
     "Sinom ARA menghadirkan kesegaran khas Jawa lewat ritual seduh small-batch yang telaten. Tiga bahan alami, tanpa pengawet buatan, tanpa jalan pintas.",
+  ingredientEyebrow: "What goes in",
   ingredientHeading: "Three ingredients, held in balance.",
+  ingredientBody:
+    "Tiga bahan alami, tanpa pengawet buatan. Asam yang menyegarkan, hangat yang membumi, dan manis yang menyeimbangkan.",
   tasteHeading: "Sweet. Sour. Earthy.",
   tasteBody:
     "Daun asam muda bertemu kehangatan kunyit dan manisnya gula aren. Menyegarkan, membumi, dan tetap khas sinom.",
@@ -120,6 +123,8 @@ export const RESELLER_INFO = Object.freeze({
   heading: "Buka peluang reseller dan dropship",
   body: "Bawa kesegaran Sinom ARA ke pelanggan di kotamu. Dapatkan penawaran harga khusus mitra dengan pengiriman aman ke seluruh Indonesia.",
   ctaLabel: "Tanya Program Reseller",
+  ctaMessage:
+    "Halo Sinom ARA! Saya tertarik menjadi mitra reseller/dropship. Boleh info harga khusus mitra dan ketentuannya?",
 } as const);
 
 export const FAQS = Object.freeze([
@@ -134,20 +139,5 @@ export const FAQS = Object.freeze([
   Object.freeze({
     question: "Apakah menerima reseller dan dropship?",
     answer: "Ya, kami membuka kesempatan kemitraan reseller dan dropship dengan penawaran harga khusus. Hubungi kami melalui WhatsApp untuk penawarannya.",
-  }),
-] as const);
-
-export const GALLERY_IMAGES = Object.freeze([
-  Object.freeze({
-    src: "/images/ara-sinom-options.jpg",
-    alt: "Pilihan ukuran dan varian kemasan Sinom ARA",
-  }),
-  Object.freeze({
-    src: "/images/ara-sinom-bottle.jpg",
-    alt: "Botol Sinom ARA 275 ml",
-  }),
-  Object.freeze({
-    src: "/images/ara-sinom-lineup.jpg",
-    alt: "Lineup produk Sinom ARA di Malang",
   }),
 ] as const);

@@ -33,6 +33,8 @@
 }
 
 .origin,
+.ingredients,
+.reseller,
 .productsSection,
 .detailsSection,
 .craft,
@@ -44,6 +46,7 @@
 }
 
 .origin,
+.ingredients,
 .productsSection,
 .detailsSection,
 .craft,
@@ -107,6 +110,53 @@
   text-transform: uppercase;
   color: var(--product-emerald);
   font-weight: 600;
+}
+
+
+/* ─── 2. Ingredients ─── */
+.ingredients {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: 5fr 6fr;
+  align-items: start;
+  gap: 8%;
+  border-block: 1px solid var(--product-line);
+}
+
+.ingredients::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 100vw;
+  height: 100%;
+  z-index: -1;
+  transform: translateX(-50%);
+  background: var(--product-surface-warm);
+}
+
+.ingredients > motion-reveal::after {
+  content: "";
+  display: block;
+  width: min(16rem, 70%);
+  aspect-ratio: 1;
+  margin-top: 4rem;
+  border: 1px solid color-mix(in srgb, var(--product-accent) 35%, transparent);
+  border-radius: 70% 30% 65% 35%;
+  transform: rotate(-12deg);
+  transition: transform var(--dur-zoom) var(--ease-smooth),
+    border-color var(--dur-smooth) var(--ease-smooth);
+}
+
+.ingredients:hover > motion-reveal::after {
+  transform: rotate(-6deg) scale(1.02);
+  border-color: color-mix(in srgb, var(--product-accent) 60%, transparent);
+}
+
+.ingredientBody {
+  margin-top: 1.5rem;
+  max-width: 42ch;
 }
 
 
@@ -370,7 +420,88 @@
   color: var(--product-text);
 }
 
-/* ─── 5. Craft & Numbered List ─── */
+/* ─── 5. Reseller / Partnership ─── */
+.reseller {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 8rem;
+  overflow: hidden;
+  border: 1px solid var(--product-emerald-border);
+  border-radius: 2.5rem 0.5rem 0.5rem 0.5rem;
+  background: var(--product-surface-warm);
+  box-shadow: 0 16px 40px rgba(80, 48, 10, 0.08);
+}
+
+.resellerContent {
+  padding: clamp(2rem, 6vw, 4.5rem);
+}
+
+.resellerBody {
+  margin-top: 1.5rem;
+  max-width: 46ch;
+}
+
+.resellerImageWrapper {
+  position: relative;
+  align-self: stretch;
+  min-height: 22rem;
+  overflow: hidden;
+  border-left: 1px solid var(--product-emerald-border);
+  background: #f0eae0;
+}
+
+.resellerImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform var(--dur-zoom) var(--ease-smooth);
+  will-change: transform;
+}
+
+.reseller:hover .resellerImage {
+  transform: scale(1.03);
+}
+
+.resellerCta {
+  display: inline-flex;
+  min-height: 3.25rem;
+  margin-top: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.9rem 2rem;
+  color: #f6f3ec;
+  background: var(--product-emerald);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 999px;
+  transition: background-color var(--dur-base) var(--ease-smooth),
+    transform var(--dur-base) var(--ease-smooth),
+    box-shadow var(--dur-base) var(--ease-smooth);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.resellerCta:hover {
+  background: var(--product-emerald-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(16, 41, 19, 0.24);
+}
+
+.resellerCta:active {
+  transform: translateY(0) scale(0.975);
+}
+
+.resellerCta:focus-visible {
+  outline: 2px solid var(--product-text);
+  outline-offset: 5px;
+}
+
+/* ─── 6. Craft & Numbered List ─── */
 .craft {
   display: grid;
   grid-template-columns: 7fr 4fr;
@@ -692,10 +823,21 @@
     gap: 2.5rem;
   }
   .origin,
+  .ingredients,
   .detailsSection,
+  .reseller,
   .faqSection {
     grid-template-columns: 1fr;
     gap: 3rem;
+  }
+  .reseller {
+    gap: 0;
+  }
+  .resellerImageWrapper {
+    grid-row: 1;
+    min-height: 18rem;
+    border-left: 0;
+    border-bottom: 1px solid var(--product-emerald-border);
   }
   .factsGrid {
     grid-template-columns: 1fr 1fr;
@@ -704,6 +846,7 @@
 
 @media (max-width: 767px) {
   .origin,
+  .ingredients,
   .craft {
     grid-template-columns: 1fr;
     gap: 4rem;
@@ -713,6 +856,17 @@
   .detailsSection,
   .faqSection {
     padding-block: 6rem;
+  }
+  .ingredients > motion-reveal::after {
+    width: min(11rem, 60%);
+    margin-top: 2.5rem;
+  }
+  .reseller {
+    border-radius: 1.5rem 0.5rem 0.5rem 0.5rem;
+    margin-bottom: 6rem;
+  }
+  .resellerImageWrapper {
+    min-height: 14rem;
   }
   .factsGrid {
     grid-template-columns: 1fr;

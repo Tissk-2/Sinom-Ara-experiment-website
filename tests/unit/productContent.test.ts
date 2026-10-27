@@ -4,10 +4,14 @@ import {
   INGREDIENTS,
   PROCESS_STEPS,
   PRODUCT_FACTS,
+  RESELLER_INFO,
   TASTE_NOTES,
   WHATSAPP_NUMBER,
   whatsappOrderMessage,
 } from "@/components/product/productContent";
+
+const HEALTH_CLAIM_PATTERN =
+  /antioxid|vitamin|anti-inflammatory|digestive|glycemic|cure|heal/i;
 
 describe("verified Sinom ARA content", () => {
   it("contains exactly the verified ingredients", () => {
@@ -39,10 +43,9 @@ describe("verified Sinom ARA content", () => {
       INGREDIENTS,
       PROCESS_STEPS,
       TASTE_NOTES,
+      RESELLER_INFO,
     });
-    expect(copy).not.toMatch(
-      /antioxid|vitamin|anti-inflammatory|digestive|glycemic|cure|heal/i,
-    );
+    expect(copy).not.toMatch(HEALTH_CLAIM_PATTERN);
   });
 
   it("builds valid WhatsApp order destinations", () => {
@@ -50,6 +53,20 @@ describe("verified Sinom ARA content", () => {
     const link = buildWhatsappLink(whatsappOrderMessage(PRODUCT_SIZES_FIXTURE));
     expect(link).toMatch(/^https:\/\/wa\.me\/62\d{8,12}\?text=/);
     expect(decodeURIComponent(link)).toContain("275 ml");
+  });
+
+  it("routes the reseller enquiry through the same WhatsApp channel", () => {
+    const link = buildWhatsappLink(RESELLER_INFO.ctaMessage);
+    expect(link).toMatch(/^https:\/\/wa\.me\/62\d{8,12}\?text=/);
+    expect(decodeURIComponent(link)).toContain("reseller");
+    expect(RESELLER_INFO.image).toMatch(/^\/images\/.+\.jpg$/);
+    expect(RESELLER_INFO.ctaLabel).toBe("Tanya Program Reseller");
+  });
+
+  it("keeps the restored ingredient section copy intact", () => {
+    expect(PRODUCT_FACTS.ingredientEyebrow).toBe("What goes in");
+    expect(PRODUCT_FACTS.ingredientHeading).toBe("Three ingredients, held in balance.");
+    expect(PRODUCT_FACTS.ingredientBody).not.toMatch(HEALTH_CLAIM_PATTERN);
   });
 });
 

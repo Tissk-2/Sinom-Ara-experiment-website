@@ -2,10 +2,12 @@ import Image from "next/image";
 import {
   buildWhatsappLink,
   FAQS,
+  INGREDIENTS,
   PROCESS_STEPS,
   PRODUCT_DETAILS,
   PRODUCT_FACTS,
   PRODUCT_SIZES,
+  RESELLER_INFO,
   SITE_URL,
   TASTE_NOTES,
   whatsappOrderMessage,
@@ -19,6 +21,40 @@ function SectionLabel({ children }: Readonly<{ children: React.ReactNode }>) {
     <p className={styles.label}>
       <ShinyText speed={6}>{children}</ShinyText>
     </p>
+  );
+}
+
+type NumberedListItem = Readonly<{
+  number: string;
+  title: string;
+  description: string;
+}>;
+
+/**
+ * Shared numbered list for ingredients and process steps.
+ *
+ * `motion-stagger` slots its children, so a real `ol`/`ul` cannot own them as
+ * DOM children. Instead the wrapper carries `role="list"` and each item
+ * `role="listitem"`, which gives assistive technology the same list structure.
+ * The decorative numerals stay hidden so the order is announced once, by the
+ * list itself, rather than read as stray text.
+ */
+function NumberedList({
+  items,
+  interval,
+}: Readonly<{ items: readonly NumberedListItem[]; interval: string }>) {
+  return (
+    <motion-stagger interval={interval} role="list" className={styles.numberedList}>
+      {items.map((item) => (
+        <div key={item.number} role="listitem" className={styles.numberedItem}>
+          <span aria-hidden="true">{item.number}</span>
+          <div>
+            <h3>{item.title}</h3>
+            <p>{item.description}</p>
+          </div>
+        </div>
+      ))}
+    </motion-stagger>
   );
 }
 
@@ -80,6 +116,23 @@ export default function ProductSections() {
         </div>
       </section>
 
+
+      {/* ─── 2. Ingredients ─── */}
+      <section id="ingredients" aria-labelledby="ingredients-heading" className={styles.ingredients}>
+        <motion-reveal>
+          <SectionLabel>{PRODUCT_FACTS.ingredientEyebrow}</SectionLabel>
+          <h2 id="ingredients-heading">{PRODUCT_FACTS.ingredientHeading}</h2>
+          <p className={styles.ingredientBody}>{PRODUCT_FACTS.ingredientBody}</p>
+        </motion-reveal>
+        <NumberedList
+          interval="0.12"
+          items={INGREDIENTS.map((item) => ({
+            number: item.number,
+            title: item.name,
+            description: item.description,
+          }))}
+        />
+      </section>
 
       {/* ─── 3. Product Lineup / Pilihan Ukuran with React Bits SpotlightCards ─── */}
       <section id="produk" aria-labelledby="products-title" className={styles.productsSection}>
@@ -163,7 +216,36 @@ export default function ProductSections() {
         </div>
       </section>
 
-      {/* ─── 5. Taste & Craft ─── */}
+      {/* ─── 5. Reseller / Partnership ─── */}
+      <section id="reseller" aria-labelledby="reseller-title" className={styles.reseller}>
+        <div className={styles.resellerImageWrapper}>
+          <Image
+            src={RESELLER_INFO.image}
+            alt="Kemasan Sinom ARA untuk mitra reseller dan dropship"
+            width={640}
+            height={800}
+            loading="lazy"
+            className={styles.resellerImage}
+          />
+        </div>
+        <div className={styles.resellerContent}>
+          <motion-reveal>
+            <SectionLabel>{RESELLER_INFO.kicker}</SectionLabel>
+            <h2 id="reseller-title">{RESELLER_INFO.heading}</h2>
+            <p className={styles.resellerBody}>{RESELLER_INFO.body}</p>
+            <a
+              href={buildWhatsappLink(RESELLER_INFO.ctaMessage)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.resellerCta}
+            >
+              {RESELLER_INFO.ctaLabel}
+            </a>
+          </motion-reveal>
+        </div>
+      </section>
+
+      {/* ─── 6. Taste & Craft ─── */}
       <section id="taste-craft" aria-labelledby="taste-heading" className={styles.craft}>
         <div>
           <motion-reveal>
@@ -181,21 +263,18 @@ export default function ProductSections() {
           <motion-reveal>
             <SectionLabel>Made with care</SectionLabel>
           </motion-reveal>
-          <motion-stagger interval="0.1" className={styles.numberedList}>
-            {PROCESS_STEPS.map((item) => (
-              <article key={item.number} role="listitem" className={styles.numberedItem}>
-                <span aria-hidden="true">{item.number}</span>
-                <div>
-                  <h3>{item.title}</h3>
-                  <p>{item.description}</p>
-                </div>
-              </article>
-            ))}
-          </motion-stagger>
+          <NumberedList
+            interval="0.1"
+            items={PROCESS_STEPS.map((item) => ({
+              number: item.number,
+              title: item.title,
+              description: item.description,
+            }))}
+          />
         </div>
       </section>
 
-      {/* ─── 6. FAQ Accordion ─── */}
+      {/* ─── 7. FAQ Accordion ─── */}
       <section id="faq" aria-labelledby="faq-title" className={styles.faqSection}>
         <motion-reveal>
           <div className={styles.faqHeadingWrapper}>
@@ -213,7 +292,7 @@ export default function ProductSections() {
         </div>
       </section>
 
-      {/* ─── 7. Final Conversion / Order Section ─── */}
+      {/* ─── 8. Final Conversion / Order Section ─── */}
       <section id="order" aria-labelledby="order-heading" className={styles.order}>
         <div className={styles.orderCopy}>
           <SectionLabel>{PRODUCT_FACTS.orderEyebrow}</SectionLabel>
@@ -241,7 +320,7 @@ export default function ProductSections() {
         <div aria-hidden="true" className={styles.sun} />
       </section>
 
-      {/* ─── 8. Minimal Footer ─── */}
+      {/* ─── 9. Minimal Footer ─── */}
       <footer className={styles.footer}>
         <div>
           <p className={styles.footerBrand}>{PRODUCT_FACTS.brand}</p>

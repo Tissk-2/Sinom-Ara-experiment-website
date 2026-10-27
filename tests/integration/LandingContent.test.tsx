@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import LandingContent from "@/components/LandingContent";
 
@@ -8,9 +8,21 @@ describe("LandingContent", () => {
   it("renders the editorial journey", () => {
     render(<LandingContent />);
     expect(screen.getByRole("heading", { name: "A Javanese classic, brewed for right now." })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Three ingredients, held in balance." })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Sweet. Sour. Earthy." })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Freshly brewed. Ready when the batch is." })).toBeInTheDocument();
     expect(screen.getByRole("contentinfo")).toBeInTheDocument();
+  });
+
+  it("lists the three verified ingredients as a list", () => {
+    render(<LandingContent />);
+    for (const name of ["Young tamarind leaves", "Fresh turmeric", "Palm sugar"]) {
+      expect(screen.getByRole("heading", { name })).toBeInTheDocument();
+    }
+    expect(
+      within(screen.getByRole("region", { name: "Three ingredients, held in balance." }))
+        .getAllByRole("listitem"),
+    ).toHaveLength(3);
   });
 
   it("shows the verified process and preparation facts", () => {
@@ -24,6 +36,15 @@ describe("LandingContent", () => {
     render(<LandingContent />);
     const link = screen.getByRole("link", { name: "Order this week on WhatsApp" });
     expect(link).toHaveAttribute("href", expect.stringMatching(/^https:\/\/wa\.me\/62\d+\?text=/));
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
+  });
+
+  it("offers a reseller enquiry through the same WhatsApp channel", () => {
+    render(<LandingContent />);
+    const link = screen.getByRole("link", { name: "Tanya Program Reseller" });
+    expect(link).toHaveAttribute("href", expect.stringMatching(/^https:\/\/wa\.me\/62\d+\?text=/));
+    expect(decodeURIComponent(link.getAttribute("href") ?? "")).toContain("reseller");
     expect(link).toHaveAttribute("target", "_blank");
     expect(link).toHaveAttribute("rel", "noopener noreferrer");
   });

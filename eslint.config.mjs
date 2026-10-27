@@ -15,6 +15,11 @@ const eslintConfig = defineConfig([
     "coverage/**",
     "temp-app/**",
     "temp-app-2/**",
+    // Local agent tooling and generated review artifacts (all gitignored).
+    ".gemini/**",
+    ".superpowers/**",
+    "review-shots/**",
+    "test-results/**",
   ]),
 ]);
 
